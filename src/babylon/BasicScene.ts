@@ -21,7 +21,7 @@ export class BasicScene {
         camera.attachControl();
         const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), this.scene);
         light.intensity = 0.5;
-        const ground = BABYLON.MeshBuilder.CreateGround("ground1", {width:10, height:10}, this.scene);
+        const ground = BABYLON.MeshBuilder.CreateGround("ground1", {width:100, height:100}, this.scene);
         const sphere = BABYLON.MeshBuilder.CreateSphere("sphere1", {diameter:1}, this.scene);
         sphere.position = new BABYLON.Vector3(0, 1, 0);
         camera.position = new BABYLON.Vector3(0, 1, -10);
