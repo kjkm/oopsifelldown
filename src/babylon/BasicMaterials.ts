@@ -1,4 +1,4 @@
-import { StandardMaterial, Texture } from "@babylonjs/core";
+import { ActionManager, RenderingManager, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 import * as BABYLON from "@babylonjs/core";
 
 export class BasicMaterials {
@@ -53,6 +53,32 @@ export class BasicMaterials {
       this.scene
     );
     ground.material = this.CreateGroundMaterial();
+
+    
+    const geo1 = BABYLON.MeshBuilder.CreateGeodesic(
+        "geo1",
+        {
+            m: 1,
+            n: 0,
+            size: 2,
+            updatable: true
+        },
+        this.scene
+    )
+    geo1.position = new BABYLON.Vector3(5, 5, 5); 
+
+
+    const rotateBox = BABYLON.MeshBuilder.CreateBox(
+        "rotateBox",
+        {
+            height: 0.5,
+            width: 5,
+            depth: 1,
+            updatable: true
+        },
+        this.scene
+    );
+    rotateBox.position = new BABYLON.Vector3(2, 3, -5); 
 
    
     const walls: BABYLON.Mesh[] = [];
