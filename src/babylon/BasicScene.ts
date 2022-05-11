@@ -20,6 +20,7 @@ export class BasicScene {
   }
 
   CreateScene(): BABYLON.Scene {
+    // Camera configuration
     const scene = new BABYLON.Scene(this.engine);
     const camera = new BABYLON.FreeCamera(
       "camera1",
@@ -27,15 +28,9 @@ export class BasicScene {
       this.scene
     );
     camera.attachControl();
-
-    const sphere = BABYLON.MeshBuilder.CreateSphere(
-      "sphere1",
-      { diameter: 1 },
-      this.scene
-    );
-    sphere.position = new BABYLON.Vector3(0, 1, 0);
     camera.position = new BABYLON.Vector3(0, 1, -10);
 
+    //create ground and light
     const light = new BABYLON.HemisphericLight(
       "light1",
       new BABYLON.Vector3(0, 1, 0),
@@ -48,6 +43,37 @@ export class BasicScene {
       { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
       this.scene
     );
+
+    // Create a sphere
+    var sphereMaterial = new BABYLON.StandardMaterial("mat", scene);
+    sphereMaterial.backFaceCulling = true;
+    sphereMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
+    sphereMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.PLANAR_MODE;
+    sphereMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    sphereMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+
+    
+
+    const sphere: BABYLON.Mesh[] = [];
+    sphere[0] = BABYLON.MeshBuilder.CreateSphere("sphere0", { diameter: 1 }, this.scene);
+    sphere[0].position = new BABYLON.Vector3(-2, 2, 0);
+    sphere[0].material = sphereMaterial;
+    sphere[1] = BABYLON.MeshBuilder.CreateSphere("shape", {diameter: 2}, this.scene);
+    sphere[1].position = new BABYLON.Vector3(0, 2, 0);
+    sphere[1].material = sphereMaterial;	
+    sphere[2] = BABYLON.MeshBuilder.CreateSphere("shape", {diameter: 1}, this.scene);
+    sphere[2].position = new BABYLON.Vector3(2, 2, 0);
+    sphere[2].material = sphereMaterial;
+
+
+    sphere[0].setParent(sphere[1]);
+    sphere[0].setPivotMatrix(BABYLON.Matrix.Translation(4, 0, 0), false);
+    sphere[1].setPivotMatrix(BABYLON.Matrix.Translation(3, 0, 0), false);
+    sphere[2].setParent(sphere[1]);
+    sphere[2].setPivotMatrix(BABYLON.Matrix.Translation(-4, 0, 0), false);
+
+    sphere[0].material.diffuseColor = new BABYLON.Color3(0.9, 0.7, 0.2);
+    sphere[0].material.specularColor = new BABYLON.Color3(0, 0.5, 1);
 
     const walls: BABYLON.Mesh[] = [];
     walls[0] = BABYLON.MeshBuilder.CreateBox(
@@ -123,6 +149,12 @@ export class BasicScene {
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skybox.material = skyboxMaterial;
+
+    scene.registerBeforeRender(function () {
+      sphere[0].rotation.y += 0.01;
+      sphere[1].rotation.y += 0.01;
+      sphere[2].rotation.y += 0.01;
+    });
 
     return scene;
   }
