@@ -46,6 +46,7 @@ export class BasicMaterials {
     );
     light.intensity = 1;
 
+    
     const ground = BABYLON.MeshBuilder.CreateGround(
       "ground1",
       { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
@@ -53,6 +54,7 @@ export class BasicMaterials {
     );
     ground.material = this.CreateGroundMaterial();
 
+   
     const walls: BABYLON.Mesh[] = [];
     walls[0] = BABYLON.MeshBuilder.CreateBox(
       "wall1",
@@ -61,7 +63,7 @@ export class BasicMaterials {
         width: this.MAP_WIDTH,
         depth: this.WALL_WIDTH,
       },
-      this.scene
+      this.scene 
     );
     walls[0].position = new BABYLON.Vector3(
       0,
@@ -75,7 +77,7 @@ export class BasicMaterials {
         width: this.WALL_WIDTH,
         depth: this.MAP_DEPTH,
       },
-      this.scene
+      this.scene 
     );
     walls[1].position = new BABYLON.Vector3(
       this.MAP_WIDTH / 2 - this.WALL_WIDTH / 2,
@@ -110,6 +112,11 @@ export class BasicMaterials {
       0,
       0
     );
+    walls.forEach((tex) => {
+        tex.material = this.CreateWallMaterial();
+        tex.material = this.CreateWallMaterial();
+      });
+    
 
     const skybox = BABYLON.MeshBuilder.CreateBox(
       "skyBox",
@@ -200,5 +207,40 @@ export class BasicMaterials {
     });
 
     return sphereMaterial;
+  }
+
+  CreateWallMaterial(): StandardMaterial {
+    const wallMaterial = new StandardMaterial("wallMaterial", this.scene);
+    const uvScale = 4;
+    const texArr: Texture[] = [];
+
+    const diffuseTex = new Texture(
+      "./textures/rust/rust_diffuse.jpg",
+      this.scene
+    );
+    wallMaterial.diffuseTexture = diffuseTex;
+    texArr.push(diffuseTex);
+
+    const normalTex = new Texture(
+      "./textures/rust/rust_normal.jpg",
+      this.scene
+    );
+    wallMaterial.bumpTexture = normalTex;
+    texArr.push(normalTex);
+
+    const aoTex = new Texture("./textures/rust/rust_ao.jpg", this.scene);
+    wallMaterial.ambientTexture = aoTex;
+    texArr.push(aoTex);
+
+    const specTex = new Texture("./textures/rust/rust_spec.jpg", this.scene);
+    wallMaterial.specularTexture = specTex;
+    texArr.push(specTex);
+
+    texArr.forEach((tex) => {
+      tex.uScale = uvScale;
+      tex.vScale = uvScale;
+    });
+
+    return wallMaterial;
   }
 }
