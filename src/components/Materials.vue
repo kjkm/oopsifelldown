@@ -6,22 +6,21 @@ defineProps<{
 
 <template>
   <div>
-    <h3>Babylon Examples</h3>
+    <h3>Materials</h3>
     <canvas></canvas>
   </div>
 </template>
 
 <script lang="ts">
   import { defineComponent } from 'vue';
-  import { BasicScene } from '@/babylon/BasicScene';
   import {BasicMaterials} from '@/babylon/BasicMaterials';
 
 
   export default defineComponent({
-    name: "BabylonExamples",
+    name: "Materials",
     mounted() {
       const canvas = document.querySelector('canvas')!;
-      new BasicScene(canvas); 
+      new BasicMaterials(canvas); 
     },
   })
 </script>

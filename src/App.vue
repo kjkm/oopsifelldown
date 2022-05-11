@@ -14,6 +14,6 @@ import BabylonExamples from "@/components/BabylonExamples.vue";
 </script>
 
 <template>
-  <BabylonExamples msg="yo" />
+  <router-view/>
 </template>
 
