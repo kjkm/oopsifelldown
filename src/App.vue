@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
-import BabylonExamples from "@/components/BabylonExamples.vue";
+import { RouterView } from "vue-router";
 </script>
 
 <script lang="ts">
