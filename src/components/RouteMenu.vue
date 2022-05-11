@@ -6,10 +6,9 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 
-
-  export default defineComponent({
-    name: "Materials",
-  })
+export default defineComponent({
+  name: "RouteMenu",
+});
 </script>
