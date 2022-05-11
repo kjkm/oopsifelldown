@@ -164,6 +164,11 @@ export class BasicMaterials {
     //skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
 
+    rotateBox.setPivotMatrix(BABYLON.Matrix.Translation(2, 0, 0));
+    scene.registerBeforeRender(function () {
+      rotateBox.rotation.y -= 0.01;
+    });
+
     return scene;
   }
 
