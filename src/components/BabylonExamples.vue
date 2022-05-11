@@ -14,11 +14,14 @@ defineProps<{
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { BasicScene } from '@/babylon/BasicScene';
+  import {BasicMaterials} from '@/babylon/BasicMaterials';
+
+
   export default defineComponent({
     name: "BabylonExamples",
     mounted() {
       const canvas = document.querySelector('canvas')!;
-      new BasicScene(canvas); 
+      new BasicMaterials(canvas); 
     },
   })
 </script>
