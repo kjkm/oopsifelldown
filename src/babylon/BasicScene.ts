@@ -150,6 +150,8 @@ export class BasicScene {
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skybox.material = skyboxMaterial;
 
+    const pomegranate = BABYLON.SceneLoader.Append("", "scenes/models/marble_bust/marble_bust_01_1k.babylon", this.scene)!;
+    pomegranate.scaling = new BABYLON.Vector3(2, 2, 2);
     scene.registerBeforeRender(function () {
       sphere[0].rotation.y += 0.01;
       sphere[1].rotation.y += 0.01;
