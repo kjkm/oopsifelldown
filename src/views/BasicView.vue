@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import BabylonExamples from "@/components/BasicComponent.vue";
+import BasicComponent from "@/components/BasicComponent.vue";
 import RouteMenu from "../components/RouteMenu.vue";
 </script>
 
 <template>
   <div class="about">
-    <BabylonExamples />
+    <BasicComponent />
     <RouteMenu />
   </div>
 </template>
