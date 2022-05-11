@@ -30,7 +30,7 @@ export class BasicMaterials {
         const sphere = BABYLON.MeshBuilder.CreateSphere("sphere1", {diameter:1}, this.scene);
         sphere.position = new BABYLON.Vector3(0, 1, 0);
         camera.position = new BABYLON.Vector3(0, 1, -10);
-        //sphere.material = this.CreateSphereMaterial(); 
+        sphere.material = this.CreateSphereMaterial(); 
 
         const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), this.scene);
         light.intensity = 1;
@@ -64,7 +64,7 @@ export class BasicMaterials {
 
     CreateGroundMaterial(): StandardMaterial {
         const groundMaterial = new StandardMaterial("groundMaterial", this.scene); 
-        const uvScale = 4;
+        const uvScale = 20;
         const texArr: Texture[] = []; 
 
         const diffuseTex = new Texture("./textures/brick/brick_diffuse.jpg", this.scene);
@@ -91,8 +91,36 @@ export class BasicMaterials {
         return groundMaterial; 
     }
 
-    //CreateSphereMaterial(): StandardMaterial {
-    // }
+    
+    CreateSphereMaterial(): StandardMaterial {
+        const sphereMaterial = new StandardMaterial("sphereMaterial", this.scene); 
+        const uvScale = 4;
+        const texArr: Texture[] = []; 
+
+        const diffuseTex = new Texture("./textures/metal/metal_diffuse.jpg", this.scene);
+        sphereMaterial.diffuseTexture = diffuseTex; 
+        texArr.push(diffuseTex); 
+
+        const normalTex = new Texture("./textures/metal/metal_normal.jpg", this.scene);
+        sphereMaterial.bumpTexture = normalTex; 
+        texArr.push(normalTex);
+
+        const aoTex = new Texture("./textures/metal/metal_ao.jpg", this.scene);
+        sphereMaterial.ambientTexture = aoTex; 
+        texArr.push(aoTex);
+
+        const specTex = new Texture("./textures/metal/metal_spec.jpg", this.scene);
+        sphereMaterial.specularTexture = specTex; 
+        texArr.push(specTex);
+
+        texArr.forEach((tex)=>{
+            tex.uScale = uvScale;
+            tex.vScale = uvScale; 
+        })
+
+        return sphereMaterial; 
+
+    }
 
 
 }
