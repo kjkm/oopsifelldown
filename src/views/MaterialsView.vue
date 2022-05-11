@@ -5,7 +5,7 @@ import RouteMenu from "../components/RouteMenu.vue";
 
 <template>
   <main>
-    <Materials msg='sup'/>
+    <Materials/>
     <RouteMenu/>
   </main>
 </template>

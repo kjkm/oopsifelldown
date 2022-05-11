@@ -5,7 +5,7 @@ import RouteMenu from '../components/RouteMenu.vue';
 
 <template>
   <div class="about">
-    <BabylonExamples msg="yo" />
+    <BabylonExamples/>
     <RouteMenu/>
   </div>
 </template>

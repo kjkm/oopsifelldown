@@ -1,9 +1,3 @@
-<script setup lang="ts">
-defineProps<{
-  msg: string;
-}>();
-</script>
-
 <template>
   <div>
     <h3>Babylon Examples</h3>
