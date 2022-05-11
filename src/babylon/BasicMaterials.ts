@@ -66,6 +66,7 @@ export class BasicMaterials {
         this.scene
     )
     geo1.position = new BABYLON.Vector3(5, 5, 5); 
+    geo1.material = this.CreateSphereMaterial(); 
 
 
     const rotateBox = BABYLON.MeshBuilder.CreateBox(
@@ -79,6 +80,7 @@ export class BasicMaterials {
         this.scene
     );
     rotateBox.position = new BABYLON.Vector3(2, 3, -5); 
+    rotateBox.material = this.CreatePlankMaterial(); 
 
    
     const walls: BABYLON.Mesh[] = [];
@@ -270,5 +272,40 @@ export class BasicMaterials {
     });
 
     return wallMaterial;
+  }
+
+  CreatePlankMaterial(): StandardMaterial {
+    const plankMaterial = new StandardMaterial("plankMaterial", this.scene);
+    const uvScale = 4;
+    const texArr: Texture[] = [];
+
+    const diffuseTex = new Texture(
+      "./textures/planks/plank_diffuse.jpg",
+      this.scene
+    );
+    plankMaterial.diffuseTexture = diffuseTex;
+    texArr.push(diffuseTex);
+
+    const normalTex = new Texture(
+      "./textures/planks/plank_normal.jpg",
+      this.scene
+    );
+    plankMaterial.bumpTexture = normalTex;
+    texArr.push(normalTex);
+
+    const aoTex = new Texture("./textures/planks/plank_ao.jpg", this.scene);
+    plankMaterial.ambientTexture = aoTex;
+    texArr.push(aoTex);
+
+    const specTex = new Texture("./textures/planks/plank_spec.jpg", this.scene);
+    plankMaterial.specularTexture = specTex;
+    texArr.push(specTex);
+
+    texArr.forEach((tex) => {
+      tex.uScale = uvScale;
+      tex.vScale = uvScale;
+    });
+
+    return plankMaterial;
   }
 }
