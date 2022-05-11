@@ -1,6 +1,6 @@
 # oopsifelldown
 
-This template should help get you started developing with Vue 3 in Vite.
+This is a final project for CS412 at PLU, Spring 2022.
 
 ## Recommended IDE Setup
 
