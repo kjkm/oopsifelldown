@@ -24,10 +24,16 @@ export class BasicScene {
         const scene = new BABYLON.Scene(this.engine);
         const camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 1, 0), this.scene);
         camera.attachControl();
+
+        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere1", {diameter:1}, this.scene);
+        sphere.position = new BABYLON.Vector3(0, 1, 0);
+        camera.position = new BABYLON.Vector3(0, 1, -10);
+
         const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), this.scene);
         light.intensity = 0.5;
+
         const ground = BABYLON.MeshBuilder.CreateGround("ground1", {width:this.MAP_WIDTH, height:this.MAP_DEPTH}, this.scene);
-        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere1", {diameter:1}, this.scene);
+        
         const walls: BABYLON.Mesh[] = [];
         walls[0] = BABYLON.MeshBuilder.CreateBox("wall1", {height:this.WALL_HEIGHT, width:this.MAP_WIDTH, depth:this.WALL_WIDTH}, this.scene);
         walls[0].position = new BABYLON.Vector3(0, 0, this.MAP_DEPTH/2 - this.WALL_WIDTH/2);
@@ -38,8 +44,17 @@ export class BasicScene {
         walls[3] = BABYLON.MeshBuilder.CreateBox("wall4", {height:this.WALL_HEIGHT, width:this.WALL_WIDTH, depth:this.MAP_DEPTH}, this.scene);
         walls[3].position = new BABYLON.Vector3(-this.MAP_WIDTH/2 + this.WALL_WIDTH/2, 0, 0);
 
-        sphere.position = new BABYLON.Vector3(0, 1, 0);
-        camera.position = new BABYLON.Vector3(0, 1, -10);
+        var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:1000.0}, this.scene);
+        var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
+        skyboxMaterial.backFaceCulling = false;
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", this.scene);
+        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+        skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+        skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+        //skyboxMaterial.disableLighting = true;
+        skybox.material = skyboxMaterial;
+
+
         return scene;
     }
 }
