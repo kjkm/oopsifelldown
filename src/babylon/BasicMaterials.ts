@@ -191,6 +191,8 @@ export class BasicMaterials {
       this.scene
     );
     sphereMaterial.bumpTexture = normalTex;
+    sphereMaterial.invertNormalMapX = true;
+    sphereMaterial.invertNormalMapY = true; 
     texArr.push(normalTex);
 
     const aoTex = new Texture("./textures/metal/metal_ao.jpg", this.scene);
