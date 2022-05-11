@@ -69,19 +69,46 @@ export class BasicMaterials {
     geo1.material = this.CreateSphereMaterial(); 
 
 
+    const geo2 = BABYLON.MeshBuilder.CreateGeodesic(
+        "geo2",
+        {
+            m: 1,
+            n: 0,
+            size: 2,
+            updatable: true
+        },
+        this.scene
+    )
+    geo2.position = new BABYLON.Vector3(5, 5, 12.5); 
+    geo2.material = this.CreateSphereMaterial(); 
+
+
     const rotateBox = BABYLON.MeshBuilder.CreateBox(
         "rotateBox",
         {
             height: 0.5,
-            width: 5,
-            depth: 1,
+            width: 7.5,
+            depth: 2,
             updatable: true
         },
         this.scene
     );
-    rotateBox.position = new BABYLON.Vector3(2, 3, -5); 
+    rotateBox.position = new BABYLON.Vector3(5, 5, -5); 
     rotateBox.material = this.CreatePlankMaterial(); 
 
+    
+    const rotateBox2 = BABYLON.MeshBuilder.CreateBox(
+        "rotateBox2",
+        {
+            height: 0.5,
+            width: 2,
+            depth: 7.5,
+            updatable: true
+        },
+        this.scene
+    );
+    rotateBox2.position = new BABYLON.Vector3(5, 5, 22.5); 
+    rotateBox2.material = this.CreatePlankMaterial(); 
    
     const walls: BABYLON.Mesh[] = [];
     walls[0] = BABYLON.MeshBuilder.CreateBox(
@@ -164,9 +191,26 @@ export class BasicMaterials {
     //skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
 
-    rotateBox.setPivotMatrix(BABYLON.Matrix.Translation(2, 0, 0));
+    rotateBox.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
       rotateBox.rotation.y -= 0.01;
+    });
+
+    geo1.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        geo1.rotation.y -= 0.01;
+        geo1.rotation.x -= 0.01;
+    }); 
+
+    geo2.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        geo2.rotation.y -= 0.01;
+        geo2.rotation.x -= 0.01;
+    }); 
+
+    rotateBox2.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+      rotateBox2.rotation.x -= 0.01;
     });
 
     return scene;
