@@ -91,8 +91,48 @@ export class SolarSystemScene {
     var neptuneMaterial = new BABYLON.StandardMaterial("neptuneTexture", this.scene);
     neptuneMaterial.diffuseTexture = new BABYLON.Texture("./textures/planets/neptune.jpg", this.scene);
     sphere[8].material = neptuneMaterial; 
+
     
-    
+    sphere[1].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        sphere[1].rotation.y -= 0.01;
+        sphere[1].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.01); 
+    }); 
+    sphere[2].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        sphere[2].rotation.y -= 0.01;
+        sphere[2].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.015);
+    }); 
+    sphere[3].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        sphere[3].rotation.y -= 0.01;
+        sphere[3].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.02);
+    }); 
+    sphere[4].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        sphere[4].rotation.y -= 0.01;
+        sphere[4].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.025);
+    }); 
+    sphere[5].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        sphere[5].rotation.y -= 0.01;
+        sphere[5].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.030);
+    }); 
+    sphere[6].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        sphere[6].rotation.y -= 0.01;
+        sphere[6].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.035);
+    }); 
+    sphere[7].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        sphere[7].rotation.y -= 0.01;
+        sphere[7].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.04);
+    }); 
+    sphere[8].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+        sphere[8].rotation.y -= 0.01;
+        sphere[8].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.045);
+    }); 
     
     
     
