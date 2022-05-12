@@ -13,7 +13,7 @@ export default defineComponent({
   name: "SolarSystemComponent",
   mounted() {
     const canvas = document.querySelector("canvas")!;
-    new BasicScene(canvas);
+    new SolarSystemScene(canvas);
   },
 });
 </script>

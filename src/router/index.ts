@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import MaterialsView from "@/views/MaterialsView.vue";
 import BasicView from "@/views/BasicView.vue";
 import HomeView from "@/views/HomeView.vue";
+import SolarView from "@/views/SolarView.vue"; 
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: "/basic",
       name: "basic",
       component: BasicView,
+    },
+    {
+      path: "/solar",
+      name: "solar",
+      component: SolarView,
     },
   ],
 });
