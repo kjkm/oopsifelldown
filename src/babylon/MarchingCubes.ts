@@ -116,7 +116,6 @@ export class MarchingCubes {
 	// March the grid
 	private March(points: number[][][], surface: number): number {
 		let edges = 0;
-		const vertices = [];
 		for(let i = 0; i < points.length - 1; i++) {
 			for(let j = 0; j < points[i].length - 1; j++) {
 				for(let k = 0; k < points[i][j].length - 1; k++) {
@@ -129,14 +128,15 @@ export class MarchingCubes {
 					vertices.push(points[i + 1][j + 1][k]);
 					vertices.push(points[i + 1][j + 1][k + 1]);
 					vertices.push(points[i][j + 1][k + 1]);
-					const edge = this.PointsToEdges(vertices, surface);
-					console.log(edge.toString(2));	
-					console.log(triTable[1])
+					const edgeIndex = this.PointsToEdgeIndex(vertices, surface);
 					
-					const midpoints = this.CalculateMidpoints(new BABYLON.Vector3(i, j, k), 2, 2, 2, edge);
-					for(let m = 0; m < midpoints.length; m++) {
-						const midpoint = midpoints[m];
-						const point = this.BuildPoint(this.scene, midpoint, 0.1, new BABYLON.Color3(1, 0, 0), i, j, k, points);
+					if(this.ContainsCutEdge(points, new BABYLON.Vector3(i, j, k), surface)) {
+						const midpoints = this.CalculateMidpoints(new BABYLON.Vector3(i, j, k), 2);
+						for(let m = 0; m < midpoints.length; m++) {
+							const midpoint = midpoints[m];
+							const point = this.BuildPoint(this.scene, midpoint, 0.1, new BABYLON.Color3(1, 0, 0), i, j, k, points);
+						}
+						this.MeshCube(midpoints, triTable[edgeIndex]);
 					}
 				}
 			}
@@ -144,11 +144,49 @@ export class MarchingCubes {
 		return edges;
 	}
 
-	private MeshCube(midpoints: BABYLON.Vector3[], triangles: number): BABYLON.Mesh {
+	private ContainsCutEdge(points: number[][][], root: BABYLON.Vector3, surface: number): boolean {
+		const x = Math.floor(root.x);
+		const y = Math.floor(root.y);
+		const z = Math.floor(root.z);
+		const x1 = x + 1;
+		const y1 = y + 1;
+		const z1 = z + 1;
+		const vertices = [];
+		vertices.push(points[x][y][z]);
+		vertices.push(points[x1][y][z]);
+		vertices.push(points[x1][y][z1]);
+		vertices.push(points[x][y][z1]);
+		vertices.push(points[x][y1][z]);
+		vertices.push(points[x1][y1][z]);
+		vertices.push(points[x1][y1][z1]);
+		vertices.push(points[x][y1][z1]);
+		for(let i = 0; i < vertices.length; i++) {
+			if(vertices[i] < surface) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	private MeshCube(midpoints: BABYLON.Vector3[], triangles: number[]): BABYLON.Mesh {
 		const surface = new BABYLON.Mesh("surface", this.scene);
-		const triangleString: string = triangles.toString(2);
 		const positions = [];
 		const indices = [];
+		for(let i = 0; i < triangles.length - 1; i++) {
+			if(triangles[i] > -1) {
+				console.log(midpoints[triangles[i]] + " " + i + " " + triangles[i]);
+				positions.push(midpoints[triangles[i]]._x);
+				positions.push(midpoints[triangles[i]]._y);
+				positions.push(midpoints[triangles[i]]._z);
+				indices.push(i);
+			}
+		}
+
+		const vertexData = new BABYLON.VertexData();
+		vertexData.positions = positions;
+		vertexData.indices = indices;
+		vertexData.applyToMesh(surface);
 		return surface;
 	}
 
@@ -187,14 +225,14 @@ export class MarchingCubes {
 	// number indicating which vertices are inside or outside the surface.
 	// This number is used to index into the edge table to determine which
 	// edges are intersected by the surface.
-	private PointsToEdges(values: number[], surface: number): number{
+	private PointsToEdgeIndex(values: number[], surface: number): number{
 		let index = 0;
 		for(let i = 0; i < values.length; i++) {
 			if(values[i] < surface) {
 				index |= 2 ** i;
 			}
 		}
-		return edgeTable[index];
+		return index;
 	}
 }
 

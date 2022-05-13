@@ -14,7 +14,7 @@ export default defineComponent({
     name: "MarchingCubesComponent",
     mounted() {
         const canvas = document.querySelector("canvas")!;
-        new MarchingCubes(canvas, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(16, 16, 16), 4, 500);
+        new MarchingCubes(canvas, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(8, 8, 8), 4, 15);
     },
 });
 </script>
