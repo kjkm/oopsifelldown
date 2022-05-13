@@ -3,8 +3,11 @@ import { Vector3 } from '@babylonjs/core';
 
 export class MarchingCubes {
 
+
     scene: BABYLON.Scene;
     engine: BABYLON.Engine;
+
+
     constructor(private canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.engine = new BABYLON.Engine(this.canvas, true);
@@ -27,12 +30,14 @@ export class MarchingCubes {
 
 		// Marching Cubes
         const scalarField = (x:number, y:number, z:number) => { return x * x + y * y + z * z; };
-        const chunk = this.BuildChunk(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(16, 16, 16), 8, 250, new BABYLON.Color3(0.2, 0.2, 0.2), scalarField);
+        const grid = this.BuildChunk(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(8, 8, 8), 4, 500, new BABYLON.Color3(0.2, 0.2, 0.2), scalarField);
+
+		this.March(grid, 25);
 
         return scene;
     }
 
-    BuildChunk(scene: BABYLON.Scene, position: BABYLON.Vector3, size: BABYLON.Vector3, subdivisions: number, surface: number, color: BABYLON.Color3, func: Function): BABYLON.Mesh {
+    private BuildChunk(scene: BABYLON.Scene, position: BABYLON.Vector3, size: BABYLON.Vector3, subdivisions: number, surface: number, color: BABYLON.Color3, func: Function): number[][][] {
         let grid: number[][][] = new Array(subdivisions);
         const points: BABYLON.Mesh[][][] = [];
 
@@ -78,10 +83,10 @@ export class MarchingCubes {
                 }
             }
         }
-        return points[0][0][0];
+        return grid;
     }
 
-    BuildPoint(scene: BABYLON.Scene, position: BABYLON.Vector3, size: number, color: BABYLON.Color3, x: number, y: number, z: number, grid: number[][][]): BABYLON.Mesh {
+    private BuildPoint(scene: BABYLON.Scene, position: BABYLON.Vector3, size: number, color: BABYLON.Color3, x: number, y: number, z: number, grid: number[][][]): BABYLON.Mesh {
         const point = BABYLON.MeshBuilder.CreateBox("point", { size: size }, scene);
         point.position = position;
         point.material = new BABYLON.StandardMaterial("point", scene);
@@ -89,6 +94,79 @@ export class MarchingCubes {
         point.material.specularColor = new BABYLON.Color3(0, 0, 0);
         return point;
     }
+
+	private March(points: number[][][], surface: number): number {
+		let edges = 0;
+		const vertices = [];
+		for(let i = 0; i < points.length - 1; i++) {
+			for(let j = 0; j < points[i].length - 1; j++) {
+				for(let k = 0; k < points[i][j].length - 1; k++) {
+					const vertices = [];
+					vertices.push(points[i][j][k]);
+					vertices.push(points[i + 1][j][k]);
+					vertices.push(points[i + 1][j][k + 1]);
+					vertices.push(points[i][j][k + 1]);
+					vertices.push(points[i][j + 1][k]);
+					vertices.push(points[i + 1][j + 1][k]);
+					vertices.push(points[i + 1][j + 1][k + 1]);
+					vertices.push(points[i][j + 1][k + 1]);
+					const edge = this.PointsToEdges(vertices, surface);
+					console.log(edge.toString(2));	
+					
+					const midpoints = this.CalculateMidpoints(new BABYLON.Vector3(i, j, k), 2, 2, 2, edge);
+					for(let m = 0; m < midpoints.length; m++) {
+						const midpoint = midpoints[m];
+						const point = this.BuildPoint(this.scene, midpoint, 0.1, new BABYLON.Color3(1, 0, 0), i, j, k, points);
+					}
+				}
+			}
+		}
+		return edges;
+	}
+
+	private CalculateMidpoints(root: BABYLON.Vector3, xStep: number, yStep: number, zStep: number, bisectedEdges: Number): BABYLON.Vector3[]{
+		const points: BABYLON.Vector3[] = [];
+		const midpoints: BABYLON.Vector3[] = [];
+
+		points.push(new BABYLON.Vector3(root.x * xStep, root.y * yStep, root.z * zStep));
+		points.push(new BABYLON.Vector3((root.x + 1) * xStep, root.y * yStep, root.z * zStep));
+		points.push(new BABYLON.Vector3((root.x + 1) * xStep, root.y * yStep, (root.z + 1) * zStep));
+		points.push(new BABYLON.Vector3(root.x * xStep, root.y * yStep, (root.z + 1) * zStep));
+		points.push(new BABYLON.Vector3(root.x * xStep, (root.y + 1) * yStep, root.z * zStep));
+		points.push(new BABYLON.Vector3((root.x + 1) * xStep, (root.y + 1) * yStep, root.z * zStep));
+		points.push(new BABYLON.Vector3((root.x + 1) * xStep, (root.y + 1) * yStep, (root.z + 1) * zStep));
+		points.push(new BABYLON.Vector3(root.x * xStep, (root.y + 1) * yStep, (root.z + 1) * zStep));
+
+		midpoints.push(BABYLON.Vector3.Lerp(points[0], points[1], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[1], points[2], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[2], points[3], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[3], points[0], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[4], points[5], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[5], points[6], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[6], points[7], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[7], points[4], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[0], points[4], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[1], points[5], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[2], points[6], 0.5));
+		midpoints.push(BABYLON.Vector3.Lerp(points[3], points[7], 0.5));
+		
+		return midpoints;
+	}
+
+
+	// Convert a list of scalar values at vertices on a cube into a binary
+	// number indicating which vertices are inside or outside the surface.
+	// This number is used to index into the edge table to determine which
+	// edges are intersected by the surface.
+	private PointsToEdges(values: number[], surface: number): number{
+		let index = 0;
+		for(let i = 0; i < values.length; i++) {
+			if(values[i] < surface) {
+				index |= 2 ** i;
+			}
+		}
+		return edgeTable[index];
+	}
 }
 
 /////////////////////////////////////
