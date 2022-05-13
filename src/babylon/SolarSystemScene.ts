@@ -1,8 +1,9 @@
 import * as BABYLON from "@babylonjs/core";
+import { Color3, CreateScreenshotUsingRenderTarget, PBRMaterial } from "@babylonjs/core";
 
 export class SolarSystemScene {
-  MAP_WIDTH = 100;
-  MAP_DEPTH = 100;
+  MAP_WIDTH = 150;
+  MAP_DEPTH = 150;
   WALL_WIDTH = 1;
   WALL_HEIGHT = 15;
 
@@ -36,21 +37,32 @@ export class SolarSystemScene {
       new BABYLON.Vector3(0, 5, 0),
       this.scene
     );
-    light.intensity = 0.75;
+    light.intensity = 0.75; 
+
+    const sunLight = new BABYLON.HemisphericLight(
+      "light1",
+      new BABYLON.Vector3(0, 10, 0),
+      this.scene
+    );
+    light.intensity = 0.75; 
 
     const ground = BABYLON.MeshBuilder.CreateGround(
       "ground1",
       { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
       this.scene
     );
-
+    light.excludedMeshes.push(ground); 
+    var groundMaterial = new BABYLON.StandardMaterial("groundTexture", this.scene); 
+    groundMaterial.diffuseTexture = new BABYLON.Texture("./textures/planets/stars.jpg", this.scene);
+    ground.material = groundMaterial; 
 
     const sphere: BABYLON.Mesh[] = []; 
-    //sphere[0] = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 5 }, this.scene);
-    //sphere[0].position = new BABYLON.Vector3(0, 5, 0); 
-    //var sunMaterial = new BABYLON.StandardMaterial("sunTexture", this.scene);
-    //sunMaterial.diffuseTexture = new BABYLON.Texture("./textures/planets/sun.jpg", this.scene);
-    //sphere[0].material = sunMaterial; 
+    sphere[0] = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 3}, this.scene); 
+    sphere[0].position = new BABYLON.Vector3(0,5,0); 
+    var sunMaterial = new BABYLON.StandardMaterial("sunTexture", this.scene); 
+    sunMaterial.diffuseTexture = new BABYLON.Texture("./textures/planets/sun.jpg", this.scene);
+    sphere[0].material = sunMaterial; 
+    light.excludedMeshes.push(sphere[0]); 
     sphere[1] = BABYLON.MeshBuilder.CreateSphere("mercury", { diameter: 1 }, this.scene);
     sphere[1].position = new BABYLON.Vector3(5, 5, 0); 
     var mercuryMaterial = new BABYLON.StandardMaterial("mercuryTexture", this.scene);
@@ -96,46 +108,48 @@ export class SolarSystemScene {
     sphere[1].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[1].rotation.y -= 0.01;
-        //sphere[1].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.01); 
+        sphere[1].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.01); 
     }); 
     sphere[2].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[2].rotation.y -= 0.01;
-        //sphere[2].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.015);
+        sphere[2].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.0105);
     }); 
     sphere[3].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[3].rotation.y -= 0.01;
-       // sphere[3].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.02);
+        sphere[3].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.011);
     }); 
     sphere[4].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[4].rotation.y -= 0.01;
-       // sphere[4].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.025);
+        sphere[4].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.0115);
     }); 
     sphere[5].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[5].rotation.y -= 0.01;
-        //sphere[5].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.030);
+        sphere[5].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.012);
     }); 
     sphere[6].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[6].rotation.y -= 0.01;
-        //sphere[6].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.035);
+        sphere[6].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.0125);
     }); 
     sphere[7].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[7].rotation.y -= 0.01;
-        //sphere[7].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.04);
+        sphere[7].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.013);
     }); 
     sphere[8].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[8].rotation.y -= 0.01;
-        //sphere[8].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.045);
+        sphere[8].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.0135);
     }); 
     
     
-    
+    for (var i = 1; i < sphere.length; i++) {
+      sunLight.excludedMeshes.push(sphere[i]); 
+    }
     
     
     
@@ -203,6 +217,13 @@ export class SolarSystemScene {
       0
     );
 
+    for (var i = 0; i < walls.length; i++) {
+      sunLight.excludedMeshes.push(walls[0]); 
+    }
+    
+
     return scene;
   }
 }
+
+
