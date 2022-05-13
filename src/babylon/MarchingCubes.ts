@@ -17,22 +17,15 @@ export class MarchingCubes {
     CreateScene(): BABYLON.Scene {
         // Camera configuration
         const scene = new BABYLON.Scene(this.engine);
-        const camera = new BABYLON.FreeCamera(
-            "camera1",
-            new BABYLON.Vector3(0, 1, 0),
-            this.scene
-        );
+        const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 1, 0), this.scene);
         camera.attachControl();
         camera.position = new BABYLON.Vector3(0, 1, -10);
 
-        //create ground and light
-        const light = new BABYLON.HemisphericLight(
-            "light1",
-            new BABYLON.Vector3(0, 0, 0),
-            this.scene
-        );
+        // Create light
+        const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 0, 0), this.scene);
         light.intensity = 1;
 
+		// Marching Cubes
         const scalarField = (x:number, y:number, z:number) => { return x * x + y * y + z * z; };
         const chunk = this.BuildChunk(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(16, 16, 16), 8, 250, new BABYLON.Color3(0.2, 0.2, 0.2), scalarField);
 
@@ -78,7 +71,7 @@ export class MarchingCubes {
             for (let y = 0; y < subdivisions; y++) {
                 for (let z = 0; z < subdivisions; z++) {
                     const color = grid[x][y][z] / scale;
-                    if(grid[x][y][z] > surface) {
+                    if(grid[x][y][z] < surface) {
                         const point = this.BuildPoint(scene, new BABYLON.Vector3(x * xStep, y * yStep, z * zStep), 0.1, new BABYLON.Color3(color, color, color), x, y, z, grid);
                         points[x][y][z] = point;
                     }
