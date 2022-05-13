@@ -3,6 +3,7 @@ import MaterialsView from "@/views/MaterialsView.vue";
 import BasicView from "@/views/BasicView.vue";
 import HomeView from "@/views/HomeView.vue";
 import SolarView from "@/views/SolarView.vue"; 
+import MarchingCubesView from "@/views/MarchingCubesView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +28,11 @@ const router = createRouter({
       name: "solar",
       component: SolarView,
     },
+    {
+      path: "/marching-cubes",
+      name: "marching-cubes",
+      component: MarchingCubesView,
+    }
   ],
 });
 
