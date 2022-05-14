@@ -10,11 +10,12 @@ export class MarchingCubes {
 	xStep: number;
 	yStep: number;
 	zStep: number;
+	backfaceCulling: boolean;
 
     scene: BABYLON.Scene;
     engine: BABYLON.Engine;
 
-    constructor(private canvas: HTMLCanvasElement, position: BABYLON.Vector3, size: BABYLON.Vector3, subdivisions: number, surface: number) {
+    constructor(private canvas: HTMLCanvasElement, position: BABYLON.Vector3, size: BABYLON.Vector3, subdivisions: number, surface: number, backfaceCulling: boolean = true) {
         this.position = position;
 		this.size = size;
 		this.subdivisions = subdivisions;
@@ -23,6 +24,8 @@ export class MarchingCubes {
 		this.xStep = size.x / subdivisions;
 		this.yStep = size.y / subdivisions;
 		this.zStep = size.z / subdivisions;
+
+		this.backfaceCulling = backfaceCulling;
 		
 		this.canvas = canvas;
         this.engine = new BABYLON.Engine(this.canvas, true);
@@ -52,6 +55,12 @@ export class MarchingCubes {
 
         return scene;
     }
+
+	Polygonize(func: Function): BABYLON.Mesh[] {
+		const grid = this.BuildChunk(this.scene, this.size, new BABYLON.Color3(0.2, 0.2, 0.2), func);
+		return this.March(grid);
+	}
+		
 
 	// Construct a grid and calculate the scalar field at each vertex.
     private BuildChunk(scene: BABYLON.Scene, size: BABYLON.Vector3, color: BABYLON.Color3, func: Function): number[][][] {
@@ -87,6 +96,7 @@ export class MarchingCubes {
             }
         }
 
+		// Uncomment to visualize the scalar field
         const scale = (max - min);
 
         for (let x = 0; x < this.subdivisions; x++) {
@@ -114,8 +124,8 @@ export class MarchingCubes {
     }
 
 	// March the grid
-	private March(points: number[][][]): number {
-		console.log(this.PointsToEdgeIndex([10, 10, 0, 10, 10, 10, 10, 10], 5).toString(2));
+	private March(points: number[][][]): BABYLON.Mesh[] {
+		const meshes: BABYLON.Mesh[] = [];
 		let edges = 0;
 		for(let i = 0; i < points.length - 1; i++) {
 			for(let j = 0; j < points[i].length - 1; j++) {
@@ -135,18 +145,20 @@ export class MarchingCubes {
 						console.log("vertices: " + vertices.toString() + " surface: " + this.surface);
 						console.log("Cut edge found at " + new BABYLON.Vector3(i, j, k) + " " + edgeIndex.toString(2));
 						const midpoints = this.CalculateMidpoints(new BABYLON.Vector3(i, j, k), 2);
-						for(let m = 0; m < midpoints.length; m++) {
-							const midpoint = midpoints[m];
-							const point = this.BuildPoint(this.scene, midpoint, 0.1, new BABYLON.Color3(1, 0, 0), i, j, k, points);
-						}
-						this.MeshCube(midpoints, triTable[edgeIndex]);
-						//this.MeshCube(midpoints, triTable[this.PointsToEdgeIndex([10, 10, 0, 10, 10, 10, 10, 10], this.surface)]);
+
+						// Uncomment to visualize the cut edges
+						// for(let m = 0; m < midpoints.length; m++) {
+						// 	const midpoint = midpoints[m];
+						// 	const point = this.BuildPoint(this.scene, midpoint, 0.1, new BABYLON.Color3(1, 0, 0), i, j, k, points);
+						// }
+
+						meshes.push(this.MeshCube(midpoints, triTable[edgeIndex]));
 						console.log(triTable[4]);
 					}
 				}
 			}
 		}
-		return edges;
+		return meshes;
 	}
 
 	private ContainsCutEdge(points: number[][][], root: BABYLON.Vector3, surface: number): boolean {
