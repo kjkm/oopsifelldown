@@ -46,15 +46,15 @@ export class MarchingCubes {
 
 		// Marching Cubes
         const scalarField = (x:number, y:number, z:number) => { return x * x + y * y + z * z; };
-        const grid = this.BuildChunk(this.scene, this.size, this.surface, new BABYLON.Color3(0.2, 0.2, 0.2), scalarField);
+        const grid = this.BuildChunk(this.scene, this.size, new BABYLON.Color3(0.2, 0.2, 0.2), scalarField);
 
-		this.March(grid, 25);
+		this.March(grid);
 
         return scene;
     }
 
 	// Construct a grid and calculate the scalar field at each vertex.
-    private BuildChunk(scene: BABYLON.Scene, size: BABYLON.Vector3, surface: number, color: BABYLON.Color3, func: Function): number[][][] {
+    private BuildChunk(scene: BABYLON.Scene, size: BABYLON.Vector3, color: BABYLON.Color3, func: Function): number[][][] {
         let grid: number[][][] = new Array(this.subdivisions);
         const points: BABYLON.Mesh[][][] = [];
 
@@ -93,7 +93,7 @@ export class MarchingCubes {
             for (let y = 0; y < this.subdivisions; y++) {
                 for (let z = 0; z < this.subdivisions; z++) {
                     const color = grid[x][y][z] / scale;
-                    if(grid[x][y][z] < surface) {
+                    if(grid[x][y][z] < this.surface) {
                         const point = this.BuildPoint(scene, new BABYLON.Vector3(x * xStep, y * yStep, z * zStep), 0.1, new BABYLON.Color3(color, color, color), x, y, z, grid);
                         points[x][y][z] = point;
                     }
@@ -114,7 +114,8 @@ export class MarchingCubes {
     }
 
 	// March the grid
-	private March(points: number[][][], surface: number): number {
+	private March(points: number[][][]): number {
+		console.log(this.PointsToEdgeIndex([10, 10, 0, 10, 10, 10, 10, 10], 5).toString(2));
 		let edges = 0;
 		for(let i = 0; i < points.length - 1; i++) {
 			for(let j = 0; j < points[i].length - 1; j++) {
@@ -128,15 +129,19 @@ export class MarchingCubes {
 					vertices.push(points[i + 1][j + 1][k]);
 					vertices.push(points[i + 1][j + 1][k + 1]);
 					vertices.push(points[i][j + 1][k + 1]);
-					const edgeIndex = this.PointsToEdgeIndex(vertices, surface);
+					const edgeIndex = this.PointsToEdgeIndex(vertices, this.surface);
 					
-					if(this.ContainsCutEdge(points, new BABYLON.Vector3(i, j, k), surface)) {
+					if(this.ContainsCutEdge(points, new BABYLON.Vector3(i, j, k), this.surface)) {
+						console.log("vertices: " + vertices.toString() + " surface: " + this.surface);
+						console.log("Cut edge found at " + new BABYLON.Vector3(i, j, k) + " " + edgeIndex.toString(2));
 						const midpoints = this.CalculateMidpoints(new BABYLON.Vector3(i, j, k), 2);
 						for(let m = 0; m < midpoints.length; m++) {
 							const midpoint = midpoints[m];
 							const point = this.BuildPoint(this.scene, midpoint, 0.1, new BABYLON.Color3(1, 0, 0), i, j, k, points);
 						}
 						this.MeshCube(midpoints, triTable[edgeIndex]);
+						//this.MeshCube(midpoints, triTable[this.PointsToEdgeIndex([10, 10, 0, 10, 10, 10, 10, 10], this.surface)]);
+						console.log(triTable[4]);
 					}
 				}
 			}
@@ -170,15 +175,16 @@ export class MarchingCubes {
 
 
 	private MeshCube(midpoints: BABYLON.Vector3[], triangles: number[]): BABYLON.Mesh {
+		console.log("meshing cube " + triangles);
 		const surface = new BABYLON.Mesh("surface", this.scene);
 		const positions = [];
 		const indices = [];
 		for(let i = 0; i < triangles.length - 1; i++) {
 			if(triangles[i] > -1) {
 				console.log(midpoints[triangles[i]] + " " + i + " " + triangles[i]);
-				positions.push(midpoints[triangles[i]]._x);
-				positions.push(midpoints[triangles[i]]._y);
 				positions.push(midpoints[triangles[i]]._z);
+				positions.push(midpoints[triangles[i]]._y);
+				positions.push(midpoints[triangles[i]]._x);
 				indices.push(i);
 			}
 		}
