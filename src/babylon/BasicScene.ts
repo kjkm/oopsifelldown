@@ -156,9 +156,11 @@ export class BasicScene {
     const surface = new MarchingCubes(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(32, 32, 32), 32, false);
     surface.Polygonize((x: number, y: number, z: number) => {
       return (x-8) ** 2 + (y-8) ** 2 + (z-8) ** 2;
-    }, 64);
+    }, 32);
     const union = BABYLON.Mesh.MergeMeshes(surface.meshes)!;
-    union.material = sphereMaterial;
+    union.material = new BABYLON.StandardMaterial("union", this.scene);
+    union.material.diffuseColor = new BABYLON.Color3(0.9, 0.7, 0.2);
+    union.material.specularColor = new BABYLON.Color3(0, 0.5, 1);
     union.position.y = 0.5;
     union.position.x = 0;
     union.position.z = 0;

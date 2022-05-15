@@ -72,19 +72,19 @@ export class MarchingCubes {
         }
 
 		// Uncomment to visualize the scalar field
-        const scale = (max - min);
+        // const scale = (max - min);
 
-        for (let x = 0; x < this.subdivisions; x++) {
-            for (let y = 0; y < this.subdivisions; y++) {
-                for (let z = 0; z < this.subdivisions; z++) {
-                    const color = grid[x][y][z] / scale;
-                    if(grid[x][y][z] < this.surface) {
-                        const point = this.BuildPoint(scene, new BABYLON.Vector3(x * xStep, y * yStep, z * zStep), 0.1, new BABYLON.Color3(color, color, color), x, y, z, grid);
-                        points[x][y][z] = point;
-                    }
-                }
-            }
-        }
+        // for (let x = 0; x < this.subdivisions; x++) {
+        //     for (let y = 0; y < this.subdivisions; y++) {
+        //         for (let z = 0; z < this.subdivisions; z++) {
+        //             const color = grid[x][y][z] / scale;
+        //             if(grid[x][y][z] < this.surface) {
+        //                 const point = this.BuildPoint(scene, new BABYLON.Vector3(x * xStep, y * yStep, z * zStep), 0.1, new BABYLON.Color3(color, color, color), x, y, z, grid);
+        //                 points[x][y][z] = point;
+        //             }
+        //         }
+        //     }
+        // }
         return grid;
     }
 
@@ -166,6 +166,7 @@ export class MarchingCubes {
 		const surface = new BABYLON.Mesh("surface", this.scene);
 		const positions = [];
 		const indices = [];
+		const normals: number[] = [];
 		for(let i = 0; i < triangles.length - 1; i++) {
 			if(triangles[i] > -1) {
 				console.log(midpoints[triangles[i]] + " " + i + " " + triangles[i]);
@@ -179,7 +180,9 @@ export class MarchingCubes {
 		const vertexData = new BABYLON.VertexData();
 		vertexData.positions = positions;
 		vertexData.indices = indices;
-		vertexData.applyToMesh(surface);
+		BABYLON.VertexData.ComputeNormals(positions, indices, normals)
+		vertexData.normals = normals;
+		vertexData.applyToMesh(surface, true);
 		return surface;
 	}
 

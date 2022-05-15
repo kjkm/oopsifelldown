@@ -1,6 +1,9 @@
 import * as BABYLON from '@babylonjs/core';
 import { meshUboDeclaration } from '@babylonjs/core/Shaders/ShadersInclude/meshUboDeclaration';
 import { MarchingCubes } from './MarchingCubes';
+import * as NOISE from 'fast-simplex-noise'
+import { noisePixelShader } from '@babylonjs/core/Shaders/noise.fragment';
+
 
 export class MarchingCubesScene{
     MAP_WIDTH = 100;
@@ -39,11 +42,13 @@ export class MarchingCubesScene{
             this.scene
         );
         light.intensity = 0.5;
+        NOISE.makeNoise3D()
 
-        const mesh = new MarchingCubes(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(16, 16, 16), 8, false);
-        mesh.Polygonize((x: number, y: number, z: number) => {
-            return x ** 2 + y ** 2 + z ** 2;
-        }, 64);
+        const mesh = new MarchingCubes(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(16, 16, 16), 16, false);
+        mesh.Polygonize(NOISE.makeNoise3D(), 0.95);
+        // mesh.Polygonize((x: number, y: number, z: number) => {
+        //     return x ** 2 - y ** 2 - z;
+        // }, 64);
         return scene;
 
     }
