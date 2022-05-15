@@ -1,6 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { Vector3 } from '@babylonjs/core';
 
+
 export class MarchingCubes {
 
 	position: BABYLON.Vector3;
@@ -144,7 +145,7 @@ export class MarchingCubes {
 					if(this.ContainsCutEdge(points, new BABYLON.Vector3(i, j, k), this.surface)) {
 						console.log("vertices: " + vertices.toString() + " surface: " + this.surface);
 						console.log("Cut edge found at " + new BABYLON.Vector3(i, j, k) + " " + edgeIndex.toString(2));
-						const midpoints = this.CalculateMidpoints(new BABYLON.Vector3(i, j, k), 2);
+						const midpoints = this.CalculateMidpoints(points, new BABYLON.Vector3(i, j, k), 2);
 
 						// Uncomment to visualize the cut edges
 						// for(let m = 0; m < midpoints.length; m++) {
@@ -209,33 +210,66 @@ export class MarchingCubes {
 	}
 
 	// Calculate the midpoints of a cube
-	private CalculateMidpoints(root: BABYLON.Vector3, bisectedEdges: Number): BABYLON.Vector3[]{
+	private CalculateMidpoints(grid: number[][][], root: BABYLON.Vector3, bisectedEdges: Number): BABYLON.Vector3[]{
 		const points: BABYLON.Vector3[] = [];
 		const midpoints: BABYLON.Vector3[] = [];
 
-		points.push(new BABYLON.Vector3(root.x * this.xStep, root.y * this.yStep, root.z * this.zStep));
-		points.push(new BABYLON.Vector3((root.x + 1) * this.xStep, root.y * this.yStep, root.z * this.zStep));
-		points.push(new BABYLON.Vector3((root.x + 1) * this.xStep, root.y * this.yStep, (root.z + 1) * this.zStep));
-		points.push(new BABYLON.Vector3(root.x * this.xStep, root.y * this.yStep, (root.z + 1) * this.zStep));
-		points.push(new BABYLON.Vector3(root.x * this.xStep, (root.y + 1) * this.yStep, root.z * this.zStep));
-		points.push(new BABYLON.Vector3((root.x + 1) * this.xStep, (root.y + 1) * this.yStep, root.z * this.zStep));
-		points.push(new BABYLON.Vector3((root.x + 1) * this.xStep, (root.y + 1) * this.yStep, (root.z + 1) * this.zStep));
-		points.push(new BABYLON.Vector3(root.x * this.xStep, (root.y + 1) * this.yStep, (root.z + 1) * this.zStep));
+		const x = root.x;
+		const y = root.y;
+		const z = root.z;
+		const x1 = x + 1;
+		const y1 = y + 1;
+		const z1 = z + 1;
 
-		midpoints.push(BABYLON.Vector3.Lerp(points[0], points[1], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[1], points[2], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[2], points[3], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[3], points[0], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[4], points[5], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[5], points[6], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[6], points[7], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[7], points[4], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[0], points[4], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[1], points[5], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[2], points[6], 0.5));
-		midpoints.push(BABYLON.Vector3.Lerp(points[3], points[7], 0.5));
+		points.push(new BABYLON.Vector3(x * this.xStep, y * this.yStep, z * this.zStep));
+		points.push(new BABYLON.Vector3(x1 * this.xStep, y * this.yStep, z * this.zStep));
+		points.push(new BABYLON.Vector3(x1 * this.xStep, y * this.yStep, z1 * this.zStep));
+		points.push(new BABYLON.Vector3(x * this.xStep, y * this.yStep, z1 * this.zStep));
+		points.push(new BABYLON.Vector3(x * this.xStep, y1 * this.yStep, z * this.zStep));
+		points.push(new BABYLON.Vector3(x1 * this.xStep, y1 * this.yStep, z * this.zStep));
+		points.push(new BABYLON.Vector3(x1 * this.xStep, y1 * this.yStep, z1 * this.zStep));
+		points.push(new BABYLON.Vector3(x * this.xStep, y1 * this.yStep, z1 * this.zStep));
+
+		// Bisect the edges
+		// midpoints.push(BABYLON.Vector3.Lerp(points[0], points[1], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[1], points[2], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[2], points[3], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[3], points[0], 0.5));
+
+		// midpoints.push(BABYLON.Vector3.Lerp(points[4], points[5], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[5], points[6], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[6], points[7], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[7], points[4], 0.5));
+
+		// midpoints.push(BABYLON.Vector3.Lerp(points[0], points[4], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[1], points[5], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[2], points[6], 0.5));
+		// midpoints.push(BABYLON.Vector3.Lerp(points[3], points[7], 0.5));
+
+		// Split edge using interpolation
+		midpoints.push(this.Interpolate(grid[x][y][z], grid[x1][y][z], points[0], points[1], this.surface));
+		midpoints.push(this.Interpolate(grid[x1][y][z], grid[x1][y][z1], points[1], points[2], this.surface));
+		midpoints.push(this.Interpolate(grid[x1][y][z1], grid[x][y][z1], points[2], points[3], this.surface));
+		midpoints.push(this.Interpolate(grid[x][y][z1], grid[x][y][z], points[3], points[0], this.surface));
+
+		midpoints.push(this.Interpolate(grid[x][y1][z], grid[x1][y1][z], points[4], points[5], this.surface));
+		midpoints.push(this.Interpolate(grid[x1][y1][z], grid[x1][y1][z1], points[5], points[6], this.surface));
+		midpoints.push(this.Interpolate(grid[x1][y1][z1], grid[x][y1][z1], points[6], points[7], this.surface));
+		midpoints.push(this.Interpolate(grid[x][y1][z1], grid[x][y1][z], points[7], points[4], this.surface));
+
+		midpoints.push(this.Interpolate(grid[x][y][z], grid[x][y1][z], points[0], points[4], this.surface));
+		midpoints.push(this.Interpolate(grid[x1][y][z], grid[x1][y1][z], points[1], points[5], this.surface));
+		midpoints.push(this.Interpolate(grid[x1][y][z1], grid[x1][y1][z1], points[2], points[6], this.surface));
+		midpoints.push(this.Interpolate(grid[x][y][z1], grid[x][y1][z1], points[3], points[7], this.surface));
+
 		
 		return midpoints;
+	}
+
+	private Interpolate(pointValue1: number, pointValue2: number, vector1: BABYLON.Vector3, vector2: BABYLON.Vector3, isovalue: number): BABYLON.Vector3{
+		const alpha = (isovalue - pointValue1) / (pointValue2 - pointValue1);
+		const interpolatedPoint = BABYLON.Vector3.Lerp(vector1, vector2, alpha);
+		return interpolatedPoint;
 	}
 
 
