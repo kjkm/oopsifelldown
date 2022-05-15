@@ -1,4 +1,5 @@
 import * as BABYLON from "@babylonjs/core";
+import { MarchingCubes } from "./MarchingCubes";
 
 export class BasicScene {
   MAP_WIDTH = 100;
@@ -150,7 +151,18 @@ export class BasicScene {
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skybox.material = skyboxMaterial;
 
-    const pomegranate = BABYLON.SceneLoader.Append("", "scenes/models/marble_bust/marble_bust_01_1k.babylon", this.scene)!;
+    //const pomegranate = BABYLON.SceneLoader.Append("", "scenes/models/marble_bust/marble_bust_01_1k.babylon", this.scene)!;
+
+    const surface = new MarchingCubes(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(32, 32, 32), 32, false);
+    surface.Polygonize((x: number, y: number, z: number) => {
+      return (x-8) ** 2 + (y-8) ** 2 + (z-8) ** 2;
+    }, 64);
+    const union = BABYLON.Mesh.MergeMeshes(surface.meshes)!;
+    union.material = sphereMaterial;
+    union.position.y = 0.5;
+    union.position.x = 0;
+    union.position.z = 0;
+
 
     scene.registerBeforeRender(function () {
       sphere[0].rotation.y += 0.01;

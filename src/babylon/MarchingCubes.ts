@@ -7,59 +7,33 @@ export class MarchingCubes {
 	position: BABYLON.Vector3;
 	size: BABYLON.Vector3;
 	subdivisions: number;
-	surface: number;
+	surface: number = 0;
 	xStep: number;
 	yStep: number;
 	zStep: number;
 	backfaceCulling: boolean;
+	meshes: BABYLON.Mesh[] = [];
 
     scene: BABYLON.Scene;
-    engine: BABYLON.Engine;
 
-    constructor(private canvas: HTMLCanvasElement, position: BABYLON.Vector3, size: BABYLON.Vector3, subdivisions: number, surface: number, backfaceCulling: boolean = true) {
+	constructor(targetScene: BABYLON.Scene, position: BABYLON.Vector3, size: BABYLON.Vector3, subdivisions: number, backfaceCulling: boolean = true) {
         this.position = position;
 		this.size = size;
 		this.subdivisions = subdivisions;
-		this.surface = surface;
 		
 		this.xStep = size.x / subdivisions;
 		this.yStep = size.y / subdivisions;
 		this.zStep = size.z / subdivisions;
 
 		this.backfaceCulling = backfaceCulling;
-		
-		this.canvas = canvas;
-        this.engine = new BABYLON.Engine(this.canvas, true);
-        this.scene = this.CreateScene();
-        this.engine.runRenderLoop(() => {
-            this.scene.render();
-        });
+		this.scene = targetScene;
     }
 
-	// TODO: Remove this function and return only a mesh
-    CreateScene(): BABYLON.Scene {
-        // Camera configuration
-        const scene = new BABYLON.Scene(this.engine);
-        const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 1, 0), this.scene);
-        camera.attachControl();
-        camera.position = new BABYLON.Vector3(0, 1, -10);
-
-        // Create light
-        const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 0, 0), this.scene);
-        light.intensity = 1;
-
-		// Marching Cubes
-        const scalarField = (x:number, y:number, z:number) => { return x * x + y * y + z * z; };
-        const grid = this.BuildChunk(this.scene, this.size, new BABYLON.Color3(0.2, 0.2, 0.2), scalarField);
-
-		this.March(grid);
-
-        return scene;
-    }
-
-	Polygonize(func: Function): BABYLON.Mesh[] {
+	Polygonize(func: Function, surface: number): BABYLON.Mesh[] {
 		const grid = this.BuildChunk(this.scene, this.size, new BABYLON.Color3(0.2, 0.2, 0.2), func);
-		return this.March(grid);
+		this.surface = surface;
+		this.meshes = this.March(grid)
+		return this.meshes;
 	}
 		
 

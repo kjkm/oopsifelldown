@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import MarchingCubesComponent from "@/components/MarchingCubesComponent.vue";
+import Marching2 from "@/components/Marching2.vue";
 import RouteMenu from "../components/RouteMenu.vue";
 </script>
 
 <template>
   <div class="about">
-    <MarchingCubesComponent />
+    <Marching2 />
     <RouteMenu />
   </div>
 </template>
