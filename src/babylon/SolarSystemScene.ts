@@ -2,8 +2,8 @@ import * as BABYLON from "@babylonjs/core";
 import { Color3, CreateScreenshotUsingRenderTarget, PBRMaterial } from "@babylonjs/core";
 
 export class SolarSystemScene {
-  MAP_WIDTH = 150;
-  MAP_DEPTH = 150;
+  MAP_WIDTH = 300;
+  MAP_DEPTH = 300;
   WALL_WIDTH = 1;
   WALL_HEIGHT = 15;
 
@@ -37,7 +37,7 @@ export class SolarSystemScene {
       new BABYLON.Vector3(0, 5, 0),
       this.scene
     );
-    light.intensity = 0.75; 
+    light.intensity = 10; 
 
     const sunLight = new BABYLON.HemisphericLight(
       "light1",
