@@ -1,5 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
-import { Color3, CreateScreenshotUsingRenderTarget, PBRMaterial } from "@babylonjs/core";
+import { Color3, CreateScreenshotUsingRenderTarget, MeshAssetTask, PBRMaterial, SceneLoader } from "@babylonjs/core";
+import "@babylonjs/loaders";
 
 export class SolarSystemScene {
   MAP_WIDTH = 300;
@@ -14,6 +15,7 @@ export class SolarSystemScene {
     this.canvas = canvas;
     this.engine = new BABYLON.Engine(this.canvas, true);
     this.scene = this.CreateScene();
+    this.CreateBarrel(); 
 
     this.engine.runRenderLoop(() => {
       this.scene.render();
@@ -151,14 +153,7 @@ export class SolarSystemScene {
       sunLight.excludedMeshes.push(sphere[i]); 
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
+
     const walls: BABYLON.Mesh[] = [];
     walls[0] = BABYLON.MeshBuilder.CreateBox(
       "wall1",
@@ -224,6 +219,14 @@ export class SolarSystemScene {
 
     return scene;
   }
+
+  CreateBarrel(): void {
+    SceneLoader.ImportMesh("","./models/","Barrel.glb", this.scene,(meshes)=>{
+        console.log('meshes', meshes);
+    });
+  }
+
+
 }
 
 
