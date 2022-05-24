@@ -70,7 +70,7 @@ export class PerlinNoise2D{
                 for (let k = 0; k < this.nodes; k++) {
                     //const point = new Vector3(i, j - 16, k)
                     const radius = 15;
-                    const border = 5;
+                    const border = 10;
                     const point = new Vector3(i - radius - border , j - border, k - radius - border);
                     //space[i][j][k] = -point.y;
 

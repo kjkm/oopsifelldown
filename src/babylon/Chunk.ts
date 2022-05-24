@@ -76,12 +76,14 @@ export class Chunk{
 			}
 		}
 
-		const vertexData = new VertexData();
-		vertexData.positions = positions;
-		vertexData.indices = indices;
-		VertexData.ComputeNormals(positions, indices, normals)
-		vertexData.normals = normals;
-		vertexData.applyToMesh(mesh, true);
+		if(positions.length > 0) {
+			const vertexData = new VertexData();
+			vertexData.positions = positions;
+			vertexData.indices = indices;
+			VertexData.ComputeNormals(positions, indices, normals)
+			vertexData.normals = normals;
+			vertexData.applyToMesh(mesh, true);
+		} 
 		return mesh;
 	}
 
