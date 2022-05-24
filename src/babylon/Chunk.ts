@@ -1,149 +1,54 @@
-import * as BABYLON from '@babylonjs/core';
-import { PerlinNoise2D } from './PerlinNoise';
+import { Vector3, Mesh, VertexData, Scene } from '@babylonjs/core';
 
+interface Options {
+	chunkName: string;
+	chunkSize?: number;
+	octaves?: number;
+	amplitude?: number;
+	frequency?: number;
+	persistence?: number;
+}
 
-export class MarchingCubes {
+export class Chunk{
 
-	position: BABYLON.Vector3;
-	size: BABYLON.Vector3;
-	subdivisions: number;
-	surface: number = 0;
-	xStep: number;
-	yStep: number;
-	zStep: number;
-	backfaceCulling: boolean;
-	meshes: BABYLON.Mesh[] = [];
+	position: Vector3;
+	chunkName: string;
+	chunkSize: number;
+	private pointCloud: number[][][];
+	scene: Scene;
+	threshold: number;
+	
 
-    scene: BABYLON.Scene;
-
-	constructor(targetScene: BABYLON.Scene, position: BABYLON.Vector3, size: BABYLON.Vector3, subdivisions: number, backfaceCulling: boolean = true) {
-        this.position = position;
-		this.size = size;
-		this.subdivisions = subdivisions;
-		
-		this.xStep = size.x / subdivisions;
-		this.yStep = size.y / subdivisions;
-		this.zStep = size.z / subdivisions;
-
-		this.backfaceCulling = backfaceCulling;
-		this.scene = targetScene;
+    constructor(position: Vector3, chunkName: string, chunkSize: number, pointCloud: number[][][], scene: Scene, threshold: number = 0) {
+		this.position = position;
+		this.chunkName = chunkName;
+		this.chunkSize = chunkSize;
+		this.pointCloud = pointCloud;
+		this.scene = scene;
+		this.threshold = threshold;
     }
 
-	Polygonize(func: Function, surface: number): BABYLON.Mesh[] {
-		const grid = this.BuildChunk(this.scene, this.size, new BABYLON.Color3(0.2, 0.2, 0.2), func);
-		this.surface = surface;
-		this.meshes = this.March(grid, false)
-		return this.meshes;
-	}
-
-	FromPointCloud(pointCloud: number[][][], isovalue: number): BABYLON.Mesh[] {
-		const noise = new PerlinNoise2D(9);
-		const noisePoints = noise.makeNoise();
-		console.log(noisePoints);
-		this.surface = isovalue;
-		const grid = this.BuildChunk(this.scene, this.size, new BABYLON.Color3(0.2, 0.2, 0.2), (x: number, y: number, z: number) => {
-			return pointCloud[x][y][z];
-		});
-		return this.March(grid, true);
-	}
-
-	BeneathSurface(value: number): boolean{
-		return value < this.surface;
-	}
-		
-
-	// Construct a grid and calculate the scalar field at each vertex.
-    private BuildChunk(scene: BABYLON.Scene, size: BABYLON.Vector3, color: BABYLON.Color3, func: Function): number[][][] {
-        let grid: number[][][] = new Array(this.subdivisions);
-        const points: BABYLON.Mesh[][][] = [];
-
-        for (let i = 0; i < this.subdivisions; i++) {
-            grid[i] = new Array(this.subdivisions);
-            points[i] = new Array(this.subdivisions);
-            for (let j = 0; j < this.subdivisions; j++) {
-                grid[i][j] = new Array(this.subdivisions);
-                points[i][j] = new Array(this.subdivisions);
-            }
-        }
-
-        let max: number = -Infinity;
-        let min: number = Infinity;
-        const xStep = size.x / this.subdivisions;
-        const yStep = size.y / this.subdivisions;
-        const zStep = size.z / this.subdivisions;
-
-        for (let x = 0; x < this.subdivisions; x++) {
-            for(let y = 0; y < this.subdivisions; y++) {
-                for(let z = 0; z < this.subdivisions; z++) {
-                    grid[x][y][z] = func((x + this.position._x) * xStep, (y + this.position._y) * yStep, (z + this.position._z) * zStep);
-                    if (grid[x][y][z] > max) {
-                        max = grid[x][y][z];
-                    }
-                    if (grid[x][y][z] < min) {
-                        min = grid[x][y][z];
-                    }
-                }
-            }
-        }
-
-		// Uncomment to visualize the scalar field
-        // const scale = (max - min);
-
-        // for (let x = 0; x < this.subdivisions; x++) {
-        //     for (let y = 0; y < this.subdivisions; y++) {
-        //         for (let z = 0; z < this.subdivisions; z++) {
-        //             const color = grid[x][y][z] / scale;
-        //             if(grid[x][y][z] < this.surface) {
-        //                 const point = this.BuildPoint(scene, new BABYLON.Vector3(x * xStep, y * yStep, z * zStep), 0.1, new BABYLON.Color3(color, color, color), x, y, z, grid);
-        //                 points[x][y][z] = point;
-        //             }
-        //         }
-        //     }
-        // }
-        return grid;
-    }
-
-	// Make a small box to represent a point
-    private BuildPoint(scene: BABYLON.Scene, position: BABYLON.Vector3, size: number, color: BABYLON.Color3, x: number, y: number, z: number, grid: number[][][]): BABYLON.Mesh {
-        const point = BABYLON.MeshBuilder.CreateBox("point", { size: size }, scene);
-        point.position = position;
-        point.material = new BABYLON.StandardMaterial("point", scene);
-        point.material.diffuseColor = color;
-        point.material.specularColor = new BABYLON.Color3(0, 0, 0);
-        return point;
-    }
-
-	// March the grid
-	private March(points: number[][][], isPointCloud: boolean): BABYLON.Mesh[] {
-		const meshes: BABYLON.Mesh[] = [];
-		let edges = 0;
-		for(let i = 0; i < points.length - 1; i++) {
-			for(let j = 0; j < points[i].length - 1; j++) {
-				for(let k = 0; k < points[i][j].length - 1; k++) {
-					const vertices = [];
-					vertices.push(points[i][j][k]);
-					vertices.push(points[i + 1][j][k]);
-					vertices.push(points[i + 1][j][k + 1]);
-					vertices.push(points[i][j][k + 1]);
-					vertices.push(points[i][j + 1][k]);
-					vertices.push(points[i + 1][j + 1][k]);
-					vertices.push(points[i + 1][j + 1][k + 1]);
-					vertices.push(points[i][j + 1][k + 1]);
-					const edgeIndex = this.PointsToEdgeIndex(vertices, this.surface);
-					
-					if(this.ContainsCutEdge(points, new BABYLON.Vector3(i, j, k))) {
-						//console.log("vertices: " + vertices.toString() + " surface: " + this.surface);
-						//console.log("Cut edge found at " + new BABYLON.Vector3(i, j, k) + " " + edgeIndex.toString(2));
-						const midpoints = this.CalculateMidpoints(points, new BABYLON.Vector3(i, j, k), 2);
-
-						// Uncomment to visualize the cut edges
-						// for(let m = 0; m < midpoints.length; m++) {
-						// 	const midpoint = midpoints[m];
-						// 	const point = this.BuildPoint(this.scene, midpoint, 0.1, new BABYLON.Color3(1, 0, 0), i, j, k, points);
-						// }
-
-						meshes.push(this.MeshCube(midpoints, triTable[edgeIndex], isPointCloud));
-						//console.log(triTable[4]);
+	BuildMesh(){
+		const meshes: Mesh[] = [];
+		for(let i = this.position.x; i < this.position.x + this.chunkSize; i++){
+			for(let j = this.position.y; j < this.position.y + this.chunkSize; j++){
+				for(let k = this.position.z; k < this.position.z + this.chunkSize; k++){
+					if( i < this.pointCloud.length - 1 && j < this.pointCloud[i].length - 1 && k < this.pointCloud[i][j].length - 1){
+						const vertices = [];
+						vertices.push(this.pointCloud[i][j][k]);
+						vertices.push(this.pointCloud[i + 1][j][k]);
+						vertices.push(this.pointCloud[i + 1][j][k + 1]);
+						vertices.push(this.pointCloud[i][j][k + 1]);
+						vertices.push(this.pointCloud[i][j + 1][k]);
+						vertices.push(this.pointCloud[i + 1][j + 1][k]);
+						vertices.push(this.pointCloud[i + 1][j + 1][k + 1]);
+						vertices.push(this.pointCloud[i][j + 1][k + 1]);
+						const edgeIndex = this.PointsToEdgeIndex(vertices, this.threshold);
+						
+						if(this.ContainsCutEdge(this.pointCloud, new Vector3(i, j, k))) {
+							const midpoints = this.CalculateMidpoints(this.pointCloud, new Vector3(i, j, k), 2);
+							meshes.push(this.MeshCube(midpoints, triTable[edgeIndex]));
+						}
 					}
 				}
 			}
@@ -151,7 +56,36 @@ export class MarchingCubes {
 		return meshes;
 	}
 
-	private ContainsCutEdge(points: number[][][], root: BABYLON.Vector3): boolean {
+	CalculateNormals(points: number[][][], root: Vector3): Vector3 {
+		return new Vector3(0, 0, 0);
+	}
+
+	private MeshCube(midpoints: Vector3[], triangles: number[]): Mesh {
+		const mesh = new Mesh("mesh", this.scene);
+		const positions = [];
+		const indices = [];
+		const normals: number[] = [];
+		for(let i = 0; i < triangles.length - 1; i++) {
+			if(triangles[i] > -1) {
+				
+				positions.push(midpoints[triangles[i]]._x);
+				positions.push(midpoints[triangles[i]]._y);
+				positions.push(midpoints[triangles[i]]._z);
+				
+				indices.push(i);
+			}
+		}
+
+		const vertexData = new VertexData();
+		vertexData.positions = positions;
+		vertexData.indices = indices;
+		VertexData.ComputeNormals(positions, indices, normals)
+		vertexData.normals = normals;
+		vertexData.applyToMesh(mesh, true);
+		return mesh;
+	}
+
+	private ContainsCutEdge(points: number[][][], root: Vector3): boolean {
 		const x = Math.floor(root.x);
 		const y = Math.floor(root.y);
 		const z = Math.floor(root.z);
@@ -168,53 +102,17 @@ export class MarchingCubes {
 		vertices.push(points[x1][y1][z1]);
 		vertices.push(points[x][y1][z1]);
 		for(let i = 0; i < vertices.length; i++) {
-			if(this.BeneathSurface(vertices[i])) {
+			if(vertices[i] < this.threshold) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-
-	private MeshCube(midpoints: BABYLON.Vector3[], triangles: number[], isPointCloud: boolean): BABYLON.Mesh {
-		//cube " + triangles);
-		const mesh = new BABYLON.Mesh("mesh", this.scene);
-		const positions = [];
-		const indices = [];
-		const normals: number[] = [];
-		for(let i = 0; i < triangles.length - 1; i++) {
-			if(triangles[i] > -1 && !isPointCloud) {
-				//console.log(midpoints[triangles[i]] + " " + i + " " + triangles[i]);
-				positions.push(midpoints[triangles[i]]._z);
-				positions.push(midpoints[triangles[i]]._y);
-				positions.push(midpoints[triangles[i]]._x);
-				
-				
-				indices.push(i);
-			}
-			if(triangles[i] > -1 && isPointCloud) {
-				//console.log(midpoints[triangles[i]] + " " + i + " " + triangles[i]);
-				positions.push(midpoints[triangles[i]]._x);
-				positions.push(midpoints[triangles[i]]._y);
-				positions.push(midpoints[triangles[i]]._z);
-				
-				indices.push(i);
-			}
-		}
-
-		const vertexData = new BABYLON.VertexData();
-		vertexData.positions = positions;
-		vertexData.indices = indices;
-		BABYLON.VertexData.ComputeNormals(positions, indices, normals)
-		vertexData.normals = normals;
-		vertexData.applyToMesh(mesh, true);
-		return mesh;
-	}
-
 	// Calculate the midpoints of a cube
-	private CalculateMidpoints(grid: number[][][], root: BABYLON.Vector3, bisectedEdges: Number): BABYLON.Vector3[]{
-		const points: BABYLON.Vector3[] = [];
-		const midpoints: BABYLON.Vector3[] = [];
+	private CalculateMidpoints(grid: number[][][], root: Vector3, bisectedEdges: Number): Vector3[]{
+		const points: Vector3[] = [];
+		const midpoints: Vector3[] = [];
 
 		const x = root.x;
 		const y = root.y;
@@ -223,54 +121,37 @@ export class MarchingCubes {
 		const y1 = y + 1;
 		const z1 = z + 1;
 
-		points.push(new BABYLON.Vector3(x * this.xStep, y * this.yStep, z * this.zStep));
-		points.push(new BABYLON.Vector3(x1 * this.xStep, y * this.yStep, z * this.zStep));
-		points.push(new BABYLON.Vector3(x1 * this.xStep, y * this.yStep, z1 * this.zStep));
-		points.push(new BABYLON.Vector3(x * this.xStep, y * this.yStep, z1 * this.zStep));
-		points.push(new BABYLON.Vector3(x * this.xStep, y1 * this.yStep, z * this.zStep));
-		points.push(new BABYLON.Vector3(x1 * this.xStep, y1 * this.yStep, z * this.zStep));
-		points.push(new BABYLON.Vector3(x1 * this.xStep, y1 * this.yStep, z1 * this.zStep));
-		points.push(new BABYLON.Vector3(x * this.xStep, y1 * this.yStep, z1 * this.zStep));
-
-		// Bisect the edges
-		// midpoints.push(BABYLON.Vector3.Lerp(points[0], points[1], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[1], points[2], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[2], points[3], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[3], points[0], 0.5));
-
-		// midpoints.push(BABYLON.Vector3.Lerp(points[4], points[5], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[5], points[6], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[6], points[7], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[7], points[4], 0.5));
-
-		// midpoints.push(BABYLON.Vector3.Lerp(points[0], points[4], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[1], points[5], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[2], points[6], 0.5));
-		// midpoints.push(BABYLON.Vector3.Lerp(points[3], points[7], 0.5));
+		points.push(new Vector3(x, y, z));
+		points.push(new Vector3(x1, y, z));
+		points.push(new Vector3(x1, y, z1));
+		points.push(new Vector3(x, y, z1));
+		points.push(new Vector3(x, y1, z));
+		points.push(new Vector3(x1, y1, z));
+		points.push(new Vector3(x1, y1, z1));
+		points.push(new Vector3(x, y1, z1));
 
 		// Split edge using interpolation
-		midpoints.push(this.Interpolate(grid[x][y][z], grid[x1][y][z], points[0], points[1], this.surface));
-		midpoints.push(this.Interpolate(grid[x1][y][z], grid[x1][y][z1], points[1], points[2], this.surface));
-		midpoints.push(this.Interpolate(grid[x1][y][z1], grid[x][y][z1], points[2], points[3], this.surface));
-		midpoints.push(this.Interpolate(grid[x][y][z1], grid[x][y][z], points[3], points[0], this.surface));
+		midpoints.push(this.Interpolate(grid[x][y][z], grid[x1][y][z], points[0], points[1], this.threshold));
+		midpoints.push(this.Interpolate(grid[x1][y][z], grid[x1][y][z1], points[1], points[2], this.threshold));
+		midpoints.push(this.Interpolate(grid[x1][y][z1], grid[x][y][z1], points[2], points[3], this.threshold));
+		midpoints.push(this.Interpolate(grid[x][y][z1], grid[x][y][z], points[3], points[0], this.threshold));
 
-		midpoints.push(this.Interpolate(grid[x][y1][z], grid[x1][y1][z], points[4], points[5], this.surface));
-		midpoints.push(this.Interpolate(grid[x1][y1][z], grid[x1][y1][z1], points[5], points[6], this.surface));
-		midpoints.push(this.Interpolate(grid[x1][y1][z1], grid[x][y1][z1], points[6], points[7], this.surface));
-		midpoints.push(this.Interpolate(grid[x][y1][z1], grid[x][y1][z], points[7], points[4], this.surface));
+		midpoints.push(this.Interpolate(grid[x][y1][z], grid[x1][y1][z], points[4], points[5], this.threshold));
+		midpoints.push(this.Interpolate(grid[x1][y1][z], grid[x1][y1][z1], points[5], points[6], this.threshold));
+		midpoints.push(this.Interpolate(grid[x1][y1][z1], grid[x][y1][z1], points[6], points[7], this.threshold));
+		midpoints.push(this.Interpolate(grid[x][y1][z1], grid[x][y1][z], points[7], points[4], this.threshold));
 
-		midpoints.push(this.Interpolate(grid[x][y][z], grid[x][y1][z], points[0], points[4], this.surface));
-		midpoints.push(this.Interpolate(grid[x1][y][z], grid[x1][y1][z], points[1], points[5], this.surface));
-		midpoints.push(this.Interpolate(grid[x1][y][z1], grid[x1][y1][z1], points[2], points[6], this.surface));
-		midpoints.push(this.Interpolate(grid[x][y][z1], grid[x][y1][z1], points[3], points[7], this.surface));
+		midpoints.push(this.Interpolate(grid[x][y][z], grid[x][y1][z], points[0], points[4], this.threshold));
+		midpoints.push(this.Interpolate(grid[x1][y][z], grid[x1][y1][z], points[1], points[5], this.threshold));
+		midpoints.push(this.Interpolate(grid[x1][y][z1], grid[x1][y1][z1], points[2], points[6], this.threshold));
+		midpoints.push(this.Interpolate(grid[x][y][z1], grid[x][y1][z1], points[3], points[7], this.threshold));
 
-		
 		return midpoints;
 	}
 
-	private Interpolate(pointValue1: number, pointValue2: number, vector1: BABYLON.Vector3, vector2: BABYLON.Vector3, isovalue: number): BABYLON.Vector3{
+	private Interpolate(pointValue1: number, pointValue2: number, vector1: Vector3, vector2: Vector3, isovalue: number): Vector3{
 		const alpha = (isovalue - pointValue1) / (pointValue2 - pointValue1);
-		const interpolatedPoint = BABYLON.Vector3.Lerp(vector1, vector2, alpha);
+		const interpolatedPoint = Vector3.Lerp(vector1, vector2, alpha);
 		return interpolatedPoint;
 	}
 
@@ -294,7 +175,7 @@ export class MarchingCubes {
 // Marching cubes lookup tables
 /////////////////////////////////////
 
-// These tables are straight the three.js marching
+// These tables slightly modified from the three.js marching
 // cubes demo, which took it from Paul Bourke's page:
 // http://paulbourke.net/geometry/polygonise/
 // who in turn got them from Cory Gene Bloyd.

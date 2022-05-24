@@ -3,6 +3,9 @@ import { meshUboDeclaration } from '@babylonjs/core/Shaders/ShadersInclude/meshU
 import { MarchingCubes } from './MarchingCubes';
 import * as NOISE from 'fast-simplex-noise'
 import { noisePixelShader } from '@babylonjs/core/Shaders/noise.fragment';
+import { PerlinNoise2D } from './PerlinNoise';
+import { Chunk } from './Chunk';
+import { Vector3 } from '@babylonjs/core';
 
 
 export class MarchingCubesScene{
@@ -42,10 +45,208 @@ export class MarchingCubesScene{
             this.scene
         );
         light.intensity = 0.5;
-        NOISE.makeNoise3D()
 
-        const mesh = new MarchingCubes(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(16, 16, 16), 16, false);
-        mesh.Polygonize(NOISE.makeNoise3D(), 0.95);
+        //const mesh = new MarchingCubes(this.scene, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(40, 40, 40), 40, false);
+
+        // let pointCloud: number[][][] = [];
+        // for (let i = 0; i < 10; i++) {
+        //     pointCloud[i] = [];
+        //     for (let j = 0; j < 10; j++) {
+        //         pointCloud[i][j] = [];
+        //         for (let k = 0; k < 10; k++) {
+        //             pointCloud[i][j][k] = Math.random() * 10;
+        //         }
+        //     }
+        // }
+
+        // const pointCloud = [
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,10,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,10,10,10,0,0,0,0],
+        //         [0,0,0,10,10,10,0,0,0,0],
+        //         [0,0,0,10,10,10,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,10,0,0,0,0,0],
+        //         [0,0,0,10,10,10,0,0,0,0],
+        //         [0,0,10,10,10,10,10,0,0,0],
+        //         [0,0,0,10,10,10,0,0,0,0],
+        //         [0,0,0,0,10,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,10,10,10,0,0,0,0],
+        //         [0,0,0,10,10,10,0,0,0,0],
+        //         [0,0,0,10,10,10,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,10,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        //     [
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //         [0,0,0,0,0,0,0,0,0,0],
+        //     ],
+        // ]
+
+        // const ground = BABYLON.MeshBuilder.CreateGround(
+        //     "ground1",
+        //     { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
+        //     this.scene
+        //   );
+        
+        const noise = new PerlinNoise2D(40);
+        const pointCloud = noise.makeNoise3D(1);
+        console.log(pointCloud);
+        const chunk0 = new Chunk(new Vector3(0, 0, 0), "chunk", 16, pointCloud, this.scene);
+        chunk0.BuildMesh();
+        const chunk1 = new Chunk(new Vector3(16, 0, 0), "chunk", 16, pointCloud, this.scene);
+        chunk1.BuildMesh();
+        const chunk2 = new Chunk(new Vector3(16, 0, 16), "chunk", 16, pointCloud, this.scene);
+        chunk2.BuildMesh();
+        const chunk3 = new Chunk(new Vector3(0, 0, 16), "chunk", 16, pointCloud, this.scene);
+        chunk3.BuildMesh();
+        const chunk4 = new Chunk(new Vector3(0, 0, 32), "chunk", 16, pointCloud, this.scene);
+        chunk4.BuildMesh();
+        const chunk5 = new Chunk(new Vector3(16, 0, 32), "chunk", 16, pointCloud, this.scene);
+        chunk5.BuildMesh();
+        const chunk6 = new Chunk(new Vector3(32, 0, 16), "chunk", 16, pointCloud, this.scene);
+        chunk6.BuildMesh();
+        const chunk7 = new Chunk(new Vector3(32, 0, 0), "chunk", 16, pointCloud, this.scene);
+        chunk7.BuildMesh();
+        const chunk8 = new Chunk(new Vector3(32, 0, 32), "chunk", 16, pointCloud, this.scene);
+        chunk8.BuildMesh();
+        const chunk9 = new Chunk(new Vector3(0, 16, 0), "chunk", 16, pointCloud, this.scene);
+        chunk9.BuildMesh();
+        const chunk10 = new Chunk(new Vector3(16, 16, 0), "chunk", 16, pointCloud, this.scene);
+        chunk10.BuildMesh();
+        const chunk11 = new Chunk(new Vector3(16, 16, 16), "chunk", 16, pointCloud, this.scene);
+        chunk11.BuildMesh();
+        const chunk12 = new Chunk(new Vector3(0, 16, 16), "chunk", 16, pointCloud, this.scene);
+        chunk12.BuildMesh();
+        const chunk13 = new Chunk(new Vector3(0, 16, 32), "chunk", 16, pointCloud, this.scene);
+        chunk13.BuildMesh();
+        const chunk14 = new Chunk(new Vector3(16, 16, 32), "chunk", 16, pointCloud, this.scene);
+        chunk14.BuildMesh();
+        const chunk15 = new Chunk(new Vector3(32, 16, 16), "chunk", 16, pointCloud, this.scene);
+        chunk15.BuildMesh();
+        const chunk16 = new Chunk(new Vector3(32, 16, 0), "chunk", 16, pointCloud, this.scene);
+        chunk16.BuildMesh();
+        const chunk17 = new Chunk(new Vector3(32, 16, 32), "chunk", 16, pointCloud, this.scene);
+        chunk17.BuildMesh();
+        
+        //mesh.FromPointCloud(pointCloud, 2);
+        //mesh.Polygonize(NOISE.makeNoise3D(), 0.95);
+        // mesh.Polygonize((x: number, y: number, z: number) => {
+        //     const noiseFunc = NOISE.makeNoise3D();
+        //     return (Math.random() * 10);
+        //     //return (x - 8) ** 2 - (y - 8) ** 2 - (z-4);
+        // }, 5);
         // mesh.Polygonize((x: number, y: number, z: number) => {
         //     return x ** 2 - y ** 2 - z;
         // }, 64);
