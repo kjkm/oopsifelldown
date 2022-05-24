@@ -1,4 +1,4 @@
-import { Vector3, Mesh, VertexData, Scene } from '@babylonjs/core';
+import { Vector3, Mesh, VertexData, Scene, VertexBuffer, MeshBuilder, Color3 } from '@babylonjs/core';
 
 interface Options {
 	chunkName: string;
@@ -47,13 +47,16 @@ export class Chunk{
 						
 						if(this.ContainsCutEdge(this.pointCloud, new Vector3(i, j, k))) {
 							const midpoints = this.CalculateMidpoints(this.pointCloud, new Vector3(i, j, k), 2);
-							meshes.push(this.MeshCube(midpoints, triTable[edgeIndex]));
+							const voxel = this.MeshCube(midpoints, triTable[edgeIndex])
+							if(voxel) {
+								meshes.push();
+							}
 						}
 					}
 				}
 			}
 		}
-		return meshes;
+		return Mesh.MergeMeshes(meshes, true);
 	}
 
 	CalculateNormals(points: number[][][], root: Vector3): Vector3 {
@@ -86,6 +89,8 @@ export class Chunk{
 		} 
 		return mesh;
 	}
+
+	
 
 	private ContainsCutEdge(points: number[][][], root: Vector3): boolean {
 		const x = Math.floor(root.x);
