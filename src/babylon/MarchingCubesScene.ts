@@ -1,7 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { PerlinNoise2D } from './PerlinNoise';
 import { Chunk } from './Chunk';
-import { Vector3 } from '@babylonjs/core';
+import { BabylonFileLoaderConfiguration, Color3, PBRMaterial, Texture, Vector3 } from '@babylonjs/core';
 
 
 export class MarchingCubesScene{
@@ -41,48 +41,47 @@ export class MarchingCubesScene{
             this.scene
         );
         light.intensity = 0.5;
-        
+
+
+        const mesh: BABYLON.Mesh[] = [];
+        const chunk: Chunk[] = []; 
         const noise = new PerlinNoise2D(40);
         const pointCloud = noise.makeNoise3D(1);
-        console.log(pointCloud);
-        const chunk0 = new Chunk(new Vector3(0, 0, 0), "chunk", 16, pointCloud, this.scene);
-        chunk0.BuildMesh();
-        const chunk1 = new Chunk(new Vector3(16, 0, 0), "chunk", 16, pointCloud, this.scene);
-        chunk1.BuildMesh();
-        const chunk2 = new Chunk(new Vector3(16, 0, 16), "chunk", 16, pointCloud, this.scene);
-        chunk2.BuildMesh();
-        const chunk3 = new Chunk(new Vector3(0, 0, 16), "chunk", 16, pointCloud, this.scene);
-        chunk3.BuildMesh();
-        const chunk4 = new Chunk(new Vector3(0, 0, 32), "chunk", 16, pointCloud, this.scene);
-        chunk4.BuildMesh();
-        const chunk5 = new Chunk(new Vector3(16, 0, 32), "chunk", 16, pointCloud, this.scene);
-        chunk5.BuildMesh();
-        const chunk6 = new Chunk(new Vector3(32, 0, 16), "chunk", 16, pointCloud, this.scene);
-        chunk6.BuildMesh();
-        const chunk7 = new Chunk(new Vector3(32, 0, 0), "chunk", 16, pointCloud, this.scene);
-        chunk7.BuildMesh();
-        const chunk8 = new Chunk(new Vector3(32, 0, 32), "chunk", 16, pointCloud, this.scene);
-        chunk8.BuildMesh();
-        const chunk9 = new Chunk(new Vector3(0, 16, 0), "chunk", 16, pointCloud, this.scene);
-        chunk9.BuildMesh();
-        const chunk10 = new Chunk(new Vector3(16, 16, 0), "chunk", 16, pointCloud, this.scene);
-        chunk10.BuildMesh();
-        const chunk11 = new Chunk(new Vector3(16, 16, 16), "chunk", 16, pointCloud, this.scene);
-        chunk11.BuildMesh();
-        const chunk12 = new Chunk(new Vector3(0, 16, 16), "chunk", 16, pointCloud, this.scene);
-        chunk12.BuildMesh();
-        const chunk13 = new Chunk(new Vector3(0, 16, 32), "chunk", 16, pointCloud, this.scene);
-        chunk13.BuildMesh();
-        const chunk14 = new Chunk(new Vector3(16, 16, 32), "chunk", 16, pointCloud, this.scene);
-        chunk14.BuildMesh();
-        const chunk15 = new Chunk(new Vector3(32, 16, 16), "chunk", 16, pointCloud, this.scene);
-        chunk15.BuildMesh();
-        const chunk16 = new Chunk(new Vector3(32, 16, 0), "chunk", 16, pointCloud, this.scene);
-        chunk16.BuildMesh();
-        const chunk17 = new Chunk(new Vector3(32, 16, 32), "chunk", 16, pointCloud, this.scene);
-        chunk17.BuildMesh();
+
+        for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < 2; j++) {
+                for (let k = 0; k < 2; k++) {
+                    chunk.push(new Chunk(new Vector3(i * 16,j * 16, k * 16),"chunk",16, pointCloud, this.scene));
+                    const goonies = chunk[(i * 2) + (j * 2) + (k)].BuildMesh(); 
+                    if (goonies) {
+                        mesh.push(goonies);
+                    }
+                }
+            }
+        }
+
+        for (let i = 0; i < mesh.length; i++) {
+            mesh[i].material = this.CreateMagic(); 
+        }
 
         return scene;
 
     }
+
+    CreateMagic(): PBRMaterial {
+        const pbr = new PBRMaterial("pbr", this.scene); 
+    
+        pbr.albedoTexture = new Texture("./textures/triangle/triangle_albedo.png", this.scene);
+        pbr.bumpTexture = new Texture("./textures/triangle/triangle_normal.png", this.scene);
+    
+        pbr.invertNormalMapX = true;
+        pbr.invertNormalMapY  = true; 
+    
+        pbr.emissiveColor = new Color3(1,1,1); 
+        pbr.emissiveTexture = new Texture("./textures/triangle/triangle_emissive.png", this.scene); 
+    
+        pbr.roughness = 1; 
+    
+        return pbr; 
+      }
 }
