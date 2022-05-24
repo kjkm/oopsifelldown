@@ -80,12 +80,14 @@ export class BasicMaterials {
     scene.gravity = new Vector3(0, gravConst / fps, 0); 
     scene.collisionsEnabled = true; 
 
+    /*
     const light = new BABYLON.HemisphericLight(
       "light1",
       new BABYLON.Vector3(0, 1, 0),
       this.scene
     );
     light.intensity = 1;
+    */
     //light.position = new BABYLON.Vector3(0,10,0);
 
     const ground = BABYLON.MeshBuilder.CreateGround(
@@ -96,35 +98,6 @@ export class BasicMaterials {
     ground.material = this.CreateMagic();
     ground.checkCollisions = true; 
 
-    /*
-    const geo1 = BABYLON.MeshBuilder.CreateGeodesic(
-        "geo1",
-        {
-            m: 1,
-            n: 0,
-            size: 2,
-            updatable: true
-        },
-        this.scene
-    )
-    geo1.position = new BABYLON.Vector3(5, 5, 5); 
-    geo1.material = this.CreateSphereMaterial(); 
-    */
-
-    /*
-    const geo2 = BABYLON.MeshBuilder.CreateGeodesic(
-        "geo2",
-        {
-            m: 1,
-            n: 0,
-            size: 2,
-            updatable: true
-        },
-        this.scene
-    )
-    geo2.position = new BABYLON.Vector3(5, 5, 12.5); 
-    geo2.material = this.CreateSphereMaterial(); 
-    */
     const spawnBox = BABYLON.MeshBuilder.CreateBox(
       "spawnBox",
       {
@@ -138,6 +111,14 @@ export class BasicMaterials {
     spawnBox.position = new BABYLON.Vector3(0,2,spawn);
     spawnBox.material = this.CreatePlatform(); 
     spawnBox.checkCollisions = true;
+
+    var glow = new BABYLON.GlowLayer('glow', this.scene);
+    const spherelights: BABYLON.Mesh[] = []; 
+    for (let i = 0; i < 5; i++) {
+      spherelights[i] = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 1}, this.scene); 
+      var sphereMaterial = new BABYLON.PBRMaterial("sphereTexture", this.scene);
+      
+    }
 
     
  
@@ -244,7 +225,7 @@ export class BasicMaterials {
     const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
     skyboxMaterial.backFaceCulling = false;
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(
-      "textures/skybox",
+      "textures/skybox/space.jpg",
       this.scene
     );
     skyboxMaterial.reflectionTexture.coordinatesMode =

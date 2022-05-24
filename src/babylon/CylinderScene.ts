@@ -3,7 +3,7 @@ import * as BABYLON from "@babylonjs/core";
 import { boundingBoxRendererVertexShader } from "@babylonjs/core/Shaders/boundingBoxRenderer.vertex";
 
 export class BasicMaterials {
-  MAP_WIDTH = 20;
+  MAP_WIDTH = 50;
   MAP_DEPTH = 100;
   WALL_WIDTH = 1;
   WALL_HEIGHT = 15;
@@ -93,8 +93,11 @@ export class BasicMaterials {
       { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
       this.scene
     );
-    ground.material = this.CreateMagic();
-    ground.checkCollisions = true; 
+    light.excludedMeshes.push(ground); 
+    var groundMaterial = new BABYLON.StandardMaterial("groundTexture", this.scene); 
+    groundMaterial.diffuseTexture = new BABYLON.Texture("./textures/planets/stars.jpg", this.scene);
+    ground.material = groundMaterial; 
+    ground.checkCollisions = true;
 
    
     const cylinder = BABYLON.MeshBuilder.CreateCylinder(
@@ -112,16 +115,15 @@ export class BasicMaterials {
     const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
     skyboxMaterial.backFaceCulling = false;
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(
-      "textures/skybox",
+      "./textures/skyBox/space.jpg",
       this.scene
     );
     skyboxMaterial.reflectionTexture.coordinatesMode =
       BABYLON.Texture.SKYBOX_MODE;
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-    //skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
-
+    
     return scene;
   }
 

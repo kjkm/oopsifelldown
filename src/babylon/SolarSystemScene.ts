@@ -129,7 +129,7 @@ export class SolarSystemScene {
     ground.material = groundMaterial; 
     ground.checkCollisions = true;
 
-    
+    var glow = new BABYLON.GlowLayer('glow', this.scene);
     const sphere: BABYLON.Mesh[] = []; 
     sphere[0] = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 10}, this.scene); 
     sphere[0].position = new BABYLON.Vector3(0, 5,0); 
@@ -178,8 +178,8 @@ export class SolarSystemScene {
 
 
     const asteroids: BABYLON.Mesh[] = [];
-    for (let i = 0; i < 36; i++) {
-      const degrees = i * 10; 
+    for (let i = 0; i < 72; i++) {
+      const degrees = i * 5; 
       const rad = degrees * (Math.PI / 180); 
       asteroids[i] = BABYLON.MeshBuilder.CreateSphere("asteroid", {diameter: 0.15 * Math.random()}, this.scene);
       asteroids[i].position = new BABYLON.Vector3(65 + (3.5 * Math.sin(rad)), 4, 0 + (3.5 * Math.cos(rad)));
@@ -241,7 +241,7 @@ export class SolarSystemScene {
     sphere[1].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
         sphere[1].rotation.y -= 0.01;
-       // sphere[1].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.01 * c); 
+        //sphere[1].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.01 * c); 
     }); 
     sphere[2].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
