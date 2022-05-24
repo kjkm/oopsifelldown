@@ -58,14 +58,10 @@ export class BasicMaterials {
     camera.keysRight.push(68);
     camera.keysUp.push(87);
     camera.keysDown.push(83); 
+  
+
   }
 
-  
-  
-  
-  
-  
-  
   CreateScene(): BABYLON.Scene {
     const spawn = -(this.MAP_DEPTH / 2) + 10; 
     const scene = new BABYLON.Scene(this.engine);
@@ -84,25 +80,14 @@ export class BasicMaterials {
     scene.gravity = new Vector3(0, gravConst / fps, 0); 
     scene.collisionsEnabled = true; 
 
-    /*
-    const sphere = BABYLON.MeshBuilder.CreateSphere(
-      "sphere1",
-      { diameter: 1 },
-      this.scene
-    );
-    sphere.position = new BABYLON.Vector3(0, 1, 0);
-    sphere.material = this.CreateSphereMaterial();
-    */
-
-    const light = new BABYLON.PointLight(
+    const light = new BABYLON.HemisphericLight(
       "light1",
       new BABYLON.Vector3(0, 1, 0),
       this.scene
     );
     light.intensity = 1;
-    light.position = new BABYLON.Vector3(0,10,0);
+    //light.position = new BABYLON.Vector3(0,10,0);
 
-    
     const ground = BABYLON.MeshBuilder.CreateGround(
       "ground1",
       { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
@@ -140,9 +125,6 @@ export class BasicMaterials {
     geo2.position = new BABYLON.Vector3(5, 5, 12.5); 
     geo2.material = this.CreateSphereMaterial(); 
     */
-
-
-
     const spawnBox = BABYLON.MeshBuilder.CreateBox(
       "spawnBox",
       {
@@ -154,7 +136,7 @@ export class BasicMaterials {
       this.scene
     );
     spawnBox.position = new BABYLON.Vector3(0,2,spawn);
-    spawnBox.material = this.CreateSphereMaterial(); 
+    spawnBox.material = this.CreatePlatform(); 
     spawnBox.checkCollisions = true;
 
     
@@ -240,7 +222,7 @@ export class BasicMaterials {
       this.scene
   );
       platforms[i].position = new BABYLON.Vector3(0,2, spawn + ((i + 1) * 8)); 
-      platforms[i].material = this.CreateSphereMaterial(); 
+      platforms[i].material = this.CreatePlatform(); 
       platforms[i].checkCollisions = true; 
 
       platforms[i].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
@@ -392,39 +374,31 @@ export class BasicMaterials {
   
   
   
-  CreateWallMaterial(): StandardMaterial {
-    const wallMaterial = new StandardMaterial("wallMaterial", this.scene);
-    const uvScale = 4;
+  CreateWallMaterial(): PBRMaterial {
+    const pbr = new PBRMaterial("pbr", this.scene); 
+    const uvScale = 2.5;
     const texArr: Texture[] = [];
 
-    const diffuseTex = new Texture(
-      "./textures/rust/rust_diffuse.jpg",
-      this.scene
-    );
-    wallMaterial.diffuseTexture = diffuseTex;
-    texArr.push(diffuseTex);
+    const albedoTex = new Texture("./textures/rust/wall_basecolor.png", this.scene);
+    pbr.albedoTexture = albedoTex; 
+    texArr.push(albedoTex); 
+    const bumpTex = new Texture("./textures/rust/wall_normal.png", this.scene);
+    pbr.bumpTexture = bumpTex; 
+    texArr.push(bumpTex); 
 
-    const normalTex = new Texture(
-      "./textures/rust/rust_normal.jpg",
-      this.scene
-    );
-    wallMaterial.bumpTexture = normalTex;
-    texArr.push(normalTex);
+    pbr.invertNormalMapX = true;
+    pbr.invertNormalMapY  = true; 
 
-    const aoTex = new Texture("./textures/rust/rust_ao.jpg", this.scene);
-    wallMaterial.ambientTexture = aoTex;
-    texArr.push(aoTex);
+    pbr.metallicTexture = new Texture("./textures/rust/wall_metallic.png", this.scene); 
 
-    const specTex = new Texture("./textures/rust/rust_spec.jpg", this.scene);
-    wallMaterial.specularTexture = specTex;
-    texArr.push(specTex);
+    pbr.roughness = 1; 
 
     texArr.forEach((tex) => {
       tex.uScale = uvScale;
       tex.vScale = uvScale;
     });
 
-    return wallMaterial;
+    return pbr; 
   }
 
 
@@ -440,6 +414,26 @@ export class BasicMaterials {
 
     pbr.emissiveColor = new Color3(1,1,1); 
     pbr.emissiveTexture = new Texture("./textures/magic/lava_emissive.png", this.scene); 
+
+    pbr.roughness = 1; 
+
+    return pbr; 
+  }
+
+
+
+  CreatePlatform(): PBRMaterial {
+    const pbr = new PBRMaterial("pbr", this.scene); 
+
+    pbr.albedoTexture = new Texture("./textures/magic/platform_basecolor.png", this.scene);
+    pbr.bumpTexture = new Texture("./textures/magic/platform_normal.png", this.scene);
+    pbr.metallicTexture = new Texture("./textures/magic/platform_metallic.png", this.scene);
+
+    pbr.invertNormalMapX = true;
+    pbr.invertNormalMapY  = true; 
+
+    pbr.emissiveColor = new Color3(1,1,1); 
+    pbr.emissiveTexture = new Texture("./textures/magic/platform_emissive.png", this.scene); 
 
     pbr.roughness = 1; 
 
