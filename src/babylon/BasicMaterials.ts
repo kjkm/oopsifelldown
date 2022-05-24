@@ -8,27 +8,76 @@ export class BasicMaterials {
   WALL_HEIGHT = 15;
 
   scene: BABYLON.Scene;
-  engine: BABYLON.Engine;
+  engine: BABYLON.Engine; 
 
   constructor(private canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.engine = new BABYLON.Engine(this.canvas, true);
     this.scene = this.CreateScene();
+    this.CreateController(); 
 
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
   }
 
-  CreateScene(): BABYLON.Scene {
-    const scene = new BABYLON.Scene(this.engine);
+  
+  
+  
+  
+  CreateController(): void {
     const camera = new BABYLON.FreeCamera(
       "camera1",
       new BABYLON.Vector3(0, 1, 0),
       this.scene
     );
     camera.attachControl();
-    camera.speed = 0.25;
+    camera.position = new BABYLON.Vector3(0, 5, -(this.MAP_DEPTH / 2) + 10);
+
+    const observer = camera.getScene().onKeyboardObservable.add((action) => {
+      if (action.type === 1 && action.event.code === 'Space') {
+        if (camera.position.y <= 4) {
+          camera.cameraDirection.y += 0.5; 
+        }
+      }
+    })
+    
+    //enables collisions and gravity
+    camera.applyGravity = true; 
+    camera.checkCollisions = true; 
+
+    //creates an ellipsoid around camera object for collision detection
+    camera.ellipsoid = new Vector3(1,1,1); 
+
+    camera.minZ = 0.4;
+    camera.speed = 0.4; 
+    camera.angularSensibility = 4000; 
+  }
+
+  
+  
+  
+  
+  
+  
+  CreateScene(): BABYLON.Scene {
+    const spawn = -(this.MAP_DEPTH / 2) + 10; 
+    const scene = new BABYLON.Scene(this.engine);
+
+    //move camera without keeping left click on
+    scene.onPointerDown = (event) => {
+      if (event.button === 0) this.engine.enterPointerlock(); 
+      if (event.button === 1) this.engine.exitPointerlock(); 
+    }
+
+    //creating gravity
+    //applied along the y axis
+    //fps used to create a smooth descent
+    const fps = 60; 
+    const gravConst = -9.81; 
+    scene.gravity = new Vector3(0, gravConst / fps, 0); 
+    scene.collisionsEnabled = true; 
+
 
     const sphere = BABYLON.MeshBuilder.CreateSphere(
       "sphere1",
@@ -36,7 +85,6 @@ export class BasicMaterials {
       this.scene
     );
     sphere.position = new BABYLON.Vector3(0, 1, 0);
-    camera.position = new BABYLON.Vector3(0, 1, -10);
     sphere.material = this.CreateSphereMaterial();
 
     const light = new BABYLON.HemisphericLight(
@@ -53,6 +101,7 @@ export class BasicMaterials {
       this.scene
     );
     ground.material = this.CreateGroundMaterial();
+    ground.checkCollisions = true; 
 
     
     const geo1 = BABYLON.MeshBuilder.CreateGeodesic(
@@ -93,8 +142,23 @@ export class BasicMaterials {
         },
         this.scene
     );
-    rotateBox.position = new BABYLON.Vector3(5, 5, -5); 
+    rotateBox.position = new BABYLON.Vector3(0, 0.5, spawn + 7.5); 
     rotateBox.material = this.CreatePlankMaterial(); 
+    rotateBox.checkCollisions = true; 
+
+    const spawnBox = BABYLON.MeshBuilder.CreateBox(
+      "spawnBox",
+      {
+        height: 0.5,
+        width: 5,
+        depth: 5,
+        updatable: true
+      },
+      this.scene
+    );
+    spawnBox.position = new BABYLON.Vector3(0,0.5,spawn);
+    spawnBox.material = this.CreatePlankMaterial(); 
+    spawnBox.checkCollisions = true;
 
     
     const rotateBox2 = BABYLON.MeshBuilder.CreateBox(
@@ -107,9 +171,13 @@ export class BasicMaterials {
         },
         this.scene
     );
-    rotateBox2.position = new BABYLON.Vector3(5, 5, 22.5); 
+    rotateBox2.position = new BABYLON.Vector3(0, 1, spawn + 14); 
     rotateBox2.material = this.CreatePlankMaterial(); 
-   
+    rotateBox2.checkCollisions = true;
+    
+    
+    
+    
     const walls: BABYLON.Mesh[] = [];
     walls[0] = BABYLON.MeshBuilder.CreateBox(
       "wall1",
@@ -173,7 +241,12 @@ export class BasicMaterials {
       });
     
 
-    const skybox = BABYLON.MeshBuilder.CreateBox(
+    
+    
+    
+    
+    
+      const skybox = BABYLON.MeshBuilder.CreateBox(
       "skyBox",
       { size: 1000.0 },
       this.scene
@@ -191,6 +264,16 @@ export class BasicMaterials {
     //skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     rotateBox.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
       rotateBox.rotation.y -= 0.01;
@@ -216,6 +299,11 @@ export class BasicMaterials {
     return scene;
   }
 
+  
+  
+  
+  
+  
   CreateGroundMaterial(): StandardMaterial {
     const groundMaterial = new StandardMaterial("groundMaterial", this.scene);
     const uvScale = 20;
@@ -251,6 +339,9 @@ export class BasicMaterials {
     return groundMaterial;
   }
 
+  
+  
+  
   CreateSphereMaterial(): StandardMaterial {
     const sphereMaterial = new StandardMaterial("sphereMaterial", this.scene);
     const uvScale = 4;
@@ -288,6 +379,10 @@ export class BasicMaterials {
     return sphereMaterial;
   }
 
+  
+  
+  
+  
   CreateWallMaterial(): StandardMaterial {
     const wallMaterial = new StandardMaterial("wallMaterial", this.scene);
     const uvScale = 4;
@@ -323,6 +418,10 @@ export class BasicMaterials {
     return wallMaterial;
   }
 
+  
+  
+  
+  
   CreatePlankMaterial(): StandardMaterial {
     const plankMaterial = new StandardMaterial("plankMaterial", this.scene);
     const uvScale = 4;
