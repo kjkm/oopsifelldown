@@ -31,6 +31,14 @@ export class SolarSystemScene {
     );
     camera.attachControl();
     camera.position = new BABYLON.Vector3(0, 1, -10);
+
+    const observer = camera.getScene().onKeyboardObservable.add((action) => {
+      if (action.type === 1 && action.event.code === 'Space') {
+        if (camera.position.y <= 2.5) {
+          camera.cameraDirection.y += 0.5; 
+        }
+      }
+    })
     
     //enables collisions and gravity
     camera.applyGravity = true; 
@@ -42,9 +50,6 @@ export class SolarSystemScene {
     camera.minZ = 0.4;
     camera.speed = 0.7; 
     camera.angularSensibility = 4000; 
-
-    
-
   }
 
   
@@ -58,7 +63,6 @@ export class SolarSystemScene {
       if (event.button === 0) this.engine.enterPointerlock(); 
       if (event.button === 1) this.engine.exitPointerlock(); 
     }
-
 
     //creating gravity
     //applied along the y axis

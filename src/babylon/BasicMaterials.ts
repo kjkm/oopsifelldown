@@ -1,8 +1,9 @@
-import { ActionManager, RenderingManager, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
+import { ActionManager, Color3, PBRMaterial, RenderingManager, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 import * as BABYLON from "@babylonjs/core";
+import { boundingBoxRendererVertexShader } from "@babylonjs/core/Shaders/boundingBoxRenderer.vertex";
 
 export class BasicMaterials {
-  MAP_WIDTH = 100;
+  MAP_WIDTH = 20;
   MAP_DEPTH = 100;
   WALL_WIDTH = 1;
   WALL_HEIGHT = 15;
@@ -36,7 +37,7 @@ export class BasicMaterials {
 
     const observer = camera.getScene().onKeyboardObservable.add((action) => {
       if (action.type === 1 && action.event.code === 'Space') {
-        if (camera.position.y <= 4) {
+        if (camera.position.y <= 8) {
           camera.cameraDirection.y += 0.5; 
         }
       }
@@ -52,6 +53,11 @@ export class BasicMaterials {
     camera.minZ = 0.4;
     camera.speed = 0.4; 
     camera.angularSensibility = 4000; 
+
+    camera.keysLeft.push(65);
+    camera.keysRight.push(68);
+    camera.keysUp.push(87);
+    camera.keysDown.push(83); 
   }
 
   
@@ -78,7 +84,7 @@ export class BasicMaterials {
     scene.gravity = new Vector3(0, gravConst / fps, 0); 
     scene.collisionsEnabled = true; 
 
-
+    /*
     const sphere = BABYLON.MeshBuilder.CreateSphere(
       "sphere1",
       { diameter: 1 },
@@ -86,13 +92,15 @@ export class BasicMaterials {
     );
     sphere.position = new BABYLON.Vector3(0, 1, 0);
     sphere.material = this.CreateSphereMaterial();
+    */
 
-    const light = new BABYLON.HemisphericLight(
+    const light = new BABYLON.PointLight(
       "light1",
       new BABYLON.Vector3(0, 1, 0),
       this.scene
     );
     light.intensity = 1;
+    light.position = new BABYLON.Vector3(0,10,0);
 
     
     const ground = BABYLON.MeshBuilder.CreateGround(
@@ -100,10 +108,10 @@ export class BasicMaterials {
       { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
       this.scene
     );
-    ground.material = this.CreateGroundMaterial();
+    ground.material = this.CreateMagic();
     ground.checkCollisions = true; 
 
-    
+    /*
     const geo1 = BABYLON.MeshBuilder.CreateGeodesic(
         "geo1",
         {
@@ -116,8 +124,9 @@ export class BasicMaterials {
     )
     geo1.position = new BABYLON.Vector3(5, 5, 5); 
     geo1.material = this.CreateSphereMaterial(); 
+    */
 
-
+    /*
     const geo2 = BABYLON.MeshBuilder.CreateGeodesic(
         "geo2",
         {
@@ -130,21 +139,9 @@ export class BasicMaterials {
     )
     geo2.position = new BABYLON.Vector3(5, 5, 12.5); 
     geo2.material = this.CreateSphereMaterial(); 
+    */
 
 
-    const rotateBox = BABYLON.MeshBuilder.CreateBox(
-        "rotateBox",
-        {
-            height: 0.5,
-            width: 7.5,
-            depth: 2,
-            updatable: true
-        },
-        this.scene
-    );
-    rotateBox.position = new BABYLON.Vector3(0, 0.5, spawn + 7.5); 
-    rotateBox.material = this.CreatePlankMaterial(); 
-    rotateBox.checkCollisions = true; 
 
     const spawnBox = BABYLON.MeshBuilder.CreateBox(
       "spawnBox",
@@ -156,27 +153,12 @@ export class BasicMaterials {
       },
       this.scene
     );
-    spawnBox.position = new BABYLON.Vector3(0,0.5,spawn);
-    spawnBox.material = this.CreatePlankMaterial(); 
+    spawnBox.position = new BABYLON.Vector3(0,2,spawn);
+    spawnBox.material = this.CreateSphereMaterial(); 
     spawnBox.checkCollisions = true;
 
     
-    const rotateBox2 = BABYLON.MeshBuilder.CreateBox(
-        "rotateBox2",
-        {
-            height: 0.5,
-            width: 2,
-            depth: 7.5,
-            updatable: true
-        },
-        this.scene
-    );
-    rotateBox2.position = new BABYLON.Vector3(0, 1, spawn + 14); 
-    rotateBox2.material = this.CreatePlankMaterial(); 
-    rotateBox2.checkCollisions = true;
-    
-    
-    
+ 
     
     const walls: BABYLON.Mesh[] = [];
     walls[0] = BABYLON.MeshBuilder.CreateBox(
@@ -239,7 +221,33 @@ export class BasicMaterials {
         tex.material = this.CreateWallMaterial();
         tex.material = this.CreateWallMaterial();
       });
+
+      for (let i = 0; i < walls.length; i++) {
+        walls[i].checkCollisions = true; 
+      }
     
+
+
+    const platforms: BABYLON.Mesh[] = [];
+    for (let i = 0; i < 8; i++) {
+      platforms[i] = BABYLON.MeshBuilder.CreateBox("rotateBox",
+      {
+          height: 0.5,
+          width: 7.5,
+          depth: 2,
+          updatable: true
+      },
+      this.scene
+  );
+      platforms[i].position = new BABYLON.Vector3(0,2, spawn + ((i + 1) * 8)); 
+      platforms[i].material = this.CreateSphereMaterial(); 
+      platforms[i].checkCollisions = true; 
+
+      platforms[i].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
+    scene.registerBeforeRender(function () {
+      platforms[i].rotation.y -= 0.01;
+    });
+    }
 
     
     
@@ -273,7 +281,7 @@ export class BasicMaterials {
     
     
     
-    
+    /*
     rotateBox.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
       rotateBox.rotation.y -= 0.01;
@@ -295,6 +303,7 @@ export class BasicMaterials {
     scene.registerBeforeRender(function () {
       rotateBox2.rotation.x -= 0.01;
     });
+    */
 
     return scene;
   }
@@ -416,6 +425,25 @@ export class BasicMaterials {
     });
 
     return wallMaterial;
+  }
+
+
+
+  CreateMagic(): PBRMaterial {
+    const pbr = new PBRMaterial("pbr", this.scene); 
+
+    pbr.albedoTexture = new Texture("./textures/magic/lava_albedo.png", this.scene);
+    pbr.bumpTexture = new Texture("./textures/magic/lava_normal.png", this.scene);
+
+    pbr.invertNormalMapX = true;
+    pbr.invertNormalMapY  = true; 
+
+    pbr.emissiveColor = new Color3(1,1,1); 
+    pbr.emissiveTexture = new Texture("./textures/magic/lava_emissive.png", this.scene); 
+
+    pbr.roughness = 1; 
+
+    return pbr; 
   }
 
   
