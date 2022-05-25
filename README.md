@@ -1,6 +1,17 @@
 # oopsifelldown
 
 This is a final project for CS412 at PLU, Spring 2022.
+Authors: Kieran Kim-Murphy and Logan Margo
+
+# FirstPerson Camera Controls
+
+W key --> forward
+S key --> backward
+A key --> left
+D key --> right
+SPACE --> jump
+
+Left mouse click on screen to lock, look around with mouse. Press ESC to exit. 
 
 ## Recommended IDE Setup
 
