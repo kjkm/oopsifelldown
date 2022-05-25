@@ -2,6 +2,10 @@ import { ActionManager, Color3, PBRMaterial, RenderingManager, StandardMaterial,
 import * as BABYLON from "@babylonjs/core";
 import { boundingBoxRendererVertexShader } from "@babylonjs/core/Shaders/boundingBoxRenderer.vertex";
 
+/*class that creates BasicMaterials Scene
+initial level for player
+used to demo emissive texture
+*/
 export class BasicMaterials {
   MAP_WIDTH = 20;
   MAP_DEPTH = 100;
@@ -50,10 +54,12 @@ export class BasicMaterials {
     //creates an ellipsoid around camera object for collision detection
     camera.ellipsoid = new Vector3(1,1,1); 
 
+    //prevents clipping
     camera.minZ = 0.4;
     camera.speed = 0.4; 
     camera.angularSensibility = 4000; 
 
+    //assigns WASD for movement
     camera.keysLeft.push(65);
     camera.keysRight.push(68);
     camera.keysUp.push(87);
@@ -80,16 +86,16 @@ export class BasicMaterials {
     scene.gravity = new Vector3(0, gravConst / fps, 0); 
     scene.collisionsEnabled = true; 
 
-    /*
-    const light = new BABYLON.HemisphericLight(
+    //point light
+    const light = new BABYLON.PointLight(
       "light1",
       new BABYLON.Vector3(0, 1, 0),
       this.scene
     );
-    light.intensity = 1;
-    */
-    //light.position = new BABYLON.Vector3(0,10,0);
+    light.intensity = 100;
+    light.position = new BABYLON.Vector3(0,10,0);
 
+    //creates ground
     const ground = BABYLON.MeshBuilder.CreateGround(
       "ground1",
       { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
@@ -98,6 +104,7 @@ export class BasicMaterials {
     ground.material = this.CreateMagic();
     ground.checkCollisions = true; 
 
+    //box to spawn on
     const spawnBox = BABYLON.MeshBuilder.CreateBox(
       "spawnBox",
       {
@@ -112,17 +119,11 @@ export class BasicMaterials {
     spawnBox.material = this.CreatePlatform(); 
     spawnBox.checkCollisions = true;
 
+    //adds glow to all emissive properties
     var glow = new BABYLON.GlowLayer('glow', this.scene);
     const spherelights: BABYLON.Mesh[] = []; 
-    for (let i = 0; i < 5; i++) {
-      spherelights[i] = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 1}, this.scene); 
-      var sphereMaterial = new BABYLON.PBRMaterial("sphereTexture", this.scene);
-      
-    }
 
-    
- 
-    
+    //creates walls to bound player to map
     const walls: BABYLON.Mesh[] = [];
     walls[0] = BABYLON.MeshBuilder.CreateBox(
       "wall1",
@@ -190,7 +191,7 @@ export class BasicMaterials {
       }
     
 
-
+    //rotating platforms
     const platforms: BABYLON.Mesh[] = [];
     for (let i = 0; i < 8; i++) {
       platforms[i] = BABYLON.MeshBuilder.CreateBox("rotateBox",
@@ -206,18 +207,15 @@ export class BasicMaterials {
       platforms[i].material = this.CreatePlatform(); 
       platforms[i].checkCollisions = true; 
 
+      //rotates platforms
       platforms[i].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
-    scene.registerBeforeRender(function () {
+      scene.registerBeforeRender(function () {
       platforms[i].rotation.y -= 0.01;
     });
     }
 
     
-    
-    
-    
-    
-      const skybox = BABYLON.MeshBuilder.CreateBox(
+    const skybox = BABYLON.MeshBuilder.CreateBox(
       "skyBox",
       { size: 1000.0 },
       this.scene
@@ -235,126 +233,11 @@ export class BasicMaterials {
     //skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /*
-    rotateBox.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
-    scene.registerBeforeRender(function () {
-      rotateBox.rotation.y -= 0.01;
-    });
-
-    geo1.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
-    scene.registerBeforeRender(function () {
-        geo1.rotation.y -= 0.01;
-        geo1.rotation.x -= 0.01;
-    }); 
-
-    geo2.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
-    scene.registerBeforeRender(function () {
-        geo2.rotation.y -= 0.01;
-        geo2.rotation.x -= 0.01;
-    }); 
-
-    rotateBox2.setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
-    scene.registerBeforeRender(function () {
-      rotateBox2.rotation.x -= 0.01;
-    });
-    */
-
     return scene;
   }
 
   
-  
-  
-  
-  
-  CreateGroundMaterial(): StandardMaterial {
-    const groundMaterial = new StandardMaterial("groundMaterial", this.scene);
-    const uvScale = 20;
-    const texArr: Texture[] = [];
-
-    const diffuseTex = new Texture(
-      "./textures/brick/brick_diffuse.jpg",
-      this.scene
-    );
-    groundMaterial.diffuseTexture = diffuseTex;
-    texArr.push(diffuseTex);
-
-    const normalTex = new Texture(
-      "./textures/brick/brick_normal.jpg",
-      this.scene
-    );
-    groundMaterial.bumpTexture = normalTex;
-    texArr.push(normalTex);
-
-    const aoTex = new Texture("./textures/brick/brick_ao.jpg", this.scene);
-    groundMaterial.ambientTexture = aoTex;
-    texArr.push(aoTex);
-
-    const specTex = new Texture("./textures/brick/brick_spec.jpg", this.scene);
-    groundMaterial.specularTexture = specTex;
-    texArr.push(specTex);
-
-    texArr.forEach((tex) => {
-      tex.uScale = uvScale;
-      tex.vScale = uvScale;
-    });
-
-    return groundMaterial;
-  }
-
-  
-  
-  
-  CreateSphereMaterial(): StandardMaterial {
-    const sphereMaterial = new StandardMaterial("sphereMaterial", this.scene);
-    const uvScale = 4;
-    const texArr: Texture[] = [];
-
-    const diffuseTex = new Texture(
-      "./textures/metal/metal_diffuse.jpg",
-      this.scene
-    );
-    sphereMaterial.diffuseTexture = diffuseTex;
-    texArr.push(diffuseTex);
-
-    const normalTex = new Texture(
-      "./textures/metal/metal_normal.jpg",
-      this.scene
-    );
-    sphereMaterial.bumpTexture = normalTex;
-    sphereMaterial.invertNormalMapX = true;
-    sphereMaterial.invertNormalMapY = true; 
-    texArr.push(normalTex);
-
-    const aoTex = new Texture("./textures/metal/metal_ao.jpg", this.scene);
-    sphereMaterial.ambientTexture = aoTex;
-    texArr.push(aoTex);
-
-    const specTex = new Texture("./textures/metal/metal_spec.jpg", this.scene);
-    sphereMaterial.specularTexture = specTex;
-    texArr.push(specTex);
-
-    texArr.forEach((tex) => {
-      tex.uScale = uvScale;
-      tex.vScale = uvScale;
-    });
-
-    return sphereMaterial;
-  }
-
-  
-  
-  
-  
+  //Wall material
   CreateWallMaterial(): PBRMaterial {
     const pbr = new PBRMaterial("pbr", this.scene); 
     const uvScale = 2.5;
@@ -383,7 +266,7 @@ export class BasicMaterials {
   }
 
 
-
+  //emissive lava
   CreateMagic(): PBRMaterial {
     const pbr = new PBRMaterial("pbr", this.scene); 
 
@@ -419,44 +302,5 @@ export class BasicMaterials {
     pbr.roughness = 1; 
 
     return pbr; 
-  }
-
-  
-  
-  
-  
-  CreatePlankMaterial(): StandardMaterial {
-    const plankMaterial = new StandardMaterial("plankMaterial", this.scene);
-    const uvScale = 4;
-    const texArr: Texture[] = [];
-
-    const diffuseTex = new Texture(
-      "./textures/planks/plank_diffuse.jpg",
-      this.scene
-    );
-    plankMaterial.diffuseTexture = diffuseTex;
-    texArr.push(diffuseTex);
-
-    const normalTex = new Texture(
-      "./textures/planks/plank_normal.jpg",
-      this.scene
-    );
-    plankMaterial.bumpTexture = normalTex;
-    texArr.push(normalTex);
-
-    const aoTex = new Texture("./textures/planks/plank_ao.jpg", this.scene);
-    plankMaterial.ambientTexture = aoTex;
-    texArr.push(aoTex);
-
-    const specTex = new Texture("./textures/planks/plank_spec.jpg", this.scene);
-    plankMaterial.specularTexture = specTex;
-    texArr.push(specTex);
-
-    texArr.forEach((tex) => {
-      tex.uScale = uvScale;
-      tex.vScale = uvScale;
-    });
-
-    return plankMaterial;
   }
 }
