@@ -3,7 +3,26 @@
 This is a final project for CS412 at PLU, Spring 2022.
 Authors: Kieran Kim-Murphy and Logan Margo
 
-# FirstPerson Camera Controls
+Screenshots for grading purposes are located in SceneImages folder.
+Presentation slides are located in the same folder as a pdf.
+
+## Sources
+[1] Paul Bourke. 1995. Polygonising a scalar field. Blog. “http://paulbourke.net/geometry/polygonise/” Accessed May, 2022.
+
+[2] Ryan Geiss. Generating Complex Procedural Terrains Using the GPU. Blog. “https://developer.nvidia.com/gpugems/gpugems3/part-i-geometry/chapter-1-generating-complex-procedural-terrains-using-gpu” Accessed May, 2022.
+
+[3] Matthew Fisher. 2014. Marching Cubes. Blog. “https://graphics.stanford.edu/~mdfisher/MarchingCubes.html” Accessed May, 2022.  
+
+[4] Sebastian Lague. 2019. Coding Adventure: Marching Cubes. Video. “https://www.youtube.com/watch?v=M3iI2l0ltbE” Accessed May, 2022. 
+
+[5] Babylon.js Documentation. “https://doc.babylonjs.com” Accessed April 2022.  
+
+[6] Berti Kruger. 2020. Forum. “https://discourse.vtk.org/t/vtkmarchingcubes-vtkdiscretemarchingcubes-does-not-produce-a-closed-mesh-surface/4312” Accessed May, 2022. 
+
+[7] Wim Eck and Maarten Lamers. Biological Content Generation: Evolving Game Terrains Through Living Organisms. 2015. Book.
+
+
+## FirstPerson Camera Controls
 
 W key --> forward
 S key --> backward
