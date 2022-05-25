@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import MaterialsView from "@/views/MaterialsView.vue";
-import BasicView from "@/views/BasicView.vue";
 import HomeView from "@/views/HomeView.vue";
 import SolarView from "@/views/SolarView.vue"; 
 import MarchingView2 from "@/views/MarchingView2.vue";
@@ -17,11 +16,6 @@ const router = createRouter({
       path: "/materials",
       name: "materials",
       component: MaterialsView,
-    },
-    {
-      path: "/basic",
-      name: "basic",
-      component: BasicView,
     },
     {
       path: "/solar",
