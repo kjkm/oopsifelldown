@@ -2,6 +2,9 @@ import * as BABYLON from "@babylonjs/core";
 import { Color3, CreateScreenshotUsingRenderTarget, MeshAssetTask, PBRMaterial, SceneLoader, Texture, Vector3 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 
+/*Class that creates SolarSytem Scene
+demos emissive textures, collisions, glow layer, and mesh movement
+*/
 export class SolarSystemScene {
   MAP_WIDTH = 200;
   MAP_DEPTH = 200;
@@ -22,6 +25,9 @@ export class SolarSystemScene {
     });
   }
 
+
+
+  //method creating camera and basic first-person controls
   CreateController(): void {
     const camera = new BABYLON.FreeCamera(
       "camera1",
@@ -50,6 +56,7 @@ export class SolarSystemScene {
     camera.speed = 0.7; 
     camera.angularSensibility = 4000; 
 
+    //binds movement to WASD
     camera.keysLeft.push(65);
     camera.keysRight.push(68);
     camera.keysUp.push(87);
@@ -60,9 +67,11 @@ export class SolarSystemScene {
   
   CreateScene(): BABYLON.Scene {
     // Camera configuration
-    const scene = new BABYLON.Scene(this.engine); 
+    const scene = new BABYLON.Scene(this.engine);
 
 
+    
+    //skybox for ceiling
     const skybox = BABYLON.MeshBuilder.CreateBox(
       "skyBox",
       { size: 1000.0 },
@@ -82,13 +91,14 @@ export class SolarSystemScene {
 
 
 
-
     //move camera without keeping left click on
     scene.onPointerDown = (event) => {
       if (event.button === 0) this.engine.enterPointerlock(); 
       if (event.button === 1) this.engine.exitPointerlock(); 
     }
 
+    
+    
     //creating gravity
     //applied along the y axis
     //fps used to create a smooth descent
@@ -96,21 +106,21 @@ export class SolarSystemScene {
     const gravConst = -9.81; 
     scene.gravity = new Vector3(0, gravConst / fps, 0); 
     scene.collisionsEnabled = true; 
-
-
-
-
-    //enable physics
     scene.enablePhysics()
 
-    //create ground and light
+    
+    
+    //creates point light at center of sun, Sun excluded
     const light = new BABYLON.PointLight(
       "light1",
       new BABYLON.Vector3(0, 5, 0),
       this.scene
     );
-    light.intensity = 10; 
-
+    light.intensity = 10;
+  
+  
+  
+    //Ambient Light 
     const sunLight = new BABYLON.HemisphericLight(
       "light1",
       new BABYLON.Vector3(0, 10, 0),
@@ -118,6 +128,9 @@ export class SolarSystemScene {
     );
     light.intensity = 0.75; 
 
+    
+    
+    //Creates ground for player to walk along
     const ground = BABYLON.MeshBuilder.CreateGround(
       "ground1",
       { width: this.MAP_WIDTH, height: this.MAP_DEPTH },
@@ -129,12 +142,14 @@ export class SolarSystemScene {
     ground.material = groundMaterial; 
     ground.checkCollisions = true;
 
+    
+    
+    //Sphere mesh array to create the sun and planets
     var glow = new BABYLON.GlowLayer('glow', this.scene);
     const sphere: BABYLON.Mesh[] = []; 
     sphere[0] = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 10}, this.scene); 
     sphere[0].position = new BABYLON.Vector3(0, 5,0); 
     sphere[0].material = this.CreateSun(); 
-    light.excludedMeshes.push(sphere[0]); 
     sphere[1] = BABYLON.MeshBuilder.CreateSphere("mercury", { diameter: 4 }, this.scene);
     sphere[1].position = new BABYLON.Vector3(10, 4, 0); 
     var mercuryMaterial = new BABYLON.StandardMaterial("mercuryTexture", this.scene);
@@ -174,9 +189,11 @@ export class SolarSystemScene {
     sphere[8].position = new BABYLON.Vector3(85, 4, 0); 
     var neptuneMaterial = new BABYLON.StandardMaterial("neptuneTexture", this.scene);
     neptuneMaterial.diffuseTexture = new BABYLON.Texture("./textures/planets/neptune.jpg", this.scene);
-    sphere[8].material = this.CreateGlacial(); 
+    sphere[8].material = neptuneMaterial; 
 
 
+    
+    //loops to create rings of spheres around saturn
     const asteroids: BABYLON.Mesh[] = [];
     for (let i = 0; i < 72; i++) {
       const degrees = i * 5; 
@@ -206,16 +223,20 @@ export class SolarSystemScene {
       asteroids.push(ast); 
     }
 
-
+    
+    
+    //sets Saturn as rotation parent in order to keep ring orbiting around planet
     for (let i = 0; i < asteroids.length; i++) {
       asteroids[i].setParent(sphere[6]); 
       asteroids[i].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0), false);
       asteroids[i].material = this.CreateAsteroid(); 
       asteroids[i].checkCollisions = true; 
-      light.excludedMeshes.push(asteroids[i]); 
+      //light.excludedMeshes.push(asteroids[i]); 
     }
 
-    
+
+
+    //creates a platform to spawn onto
     const spawn = -(this.MAP_DEPTH / 2) + 10;
     const spawnBox = BABYLON.MeshBuilder.CreateBox(
       "spawnBox",
@@ -232,7 +253,9 @@ export class SolarSystemScene {
     spawnBox.checkCollisions = true;
 
     
-
+    
+    //Controls both the rotation and revolution of each planet
+    //Each planet rotates around the sun anr spins around it's own axis
     const c = 0.4; 
     sphere[0].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
@@ -240,56 +263,58 @@ export class SolarSystemScene {
     });
     sphere[1].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
-        sphere[1].rotation.y -= 0.01;
+        sphere[1].rotation.y -= 0.05;
         sphere[1].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.01 * c); 
     }); 
     sphere[2].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
-        sphere[2].rotation.y -= 0.01;
+        sphere[2].rotation.y -= 0.05;
         sphere[2].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.0105 * c);
     }); 
     sphere[3].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
-        sphere[3].rotation.y -= 0.01;
+        sphere[3].rotation.y -= 0.05;
         sphere[3].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.011 * c);
     }); 
     sphere[4].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
-        sphere[4].rotation.y -= 0.01;
+        sphere[4].rotation.y -= 0.05;
         sphere[4].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.0115 * c);
     }); 
     sphere[5].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
-        sphere[5].rotation.y -= 0.01;
+        sphere[5].rotation.y -= 0.05;
         sphere[5].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.012 * c);
     }); 
     sphere[6].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
-        sphere[6].rotation.y -= 0.01;
+        sphere[6].rotation.y -= 0.05;
         sphere[6].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.0125 * c);
     }); 
     sphere[7].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
-        sphere[7].rotation.y -= 0.01;
+        sphere[7].rotation.y -= 0.05;
         sphere[7].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.013 * c);
     }); 
     sphere[8].setPivotMatrix(BABYLON.Matrix.Translation(0, 0, 0));
     scene.registerBeforeRender(function () {
-        sphere[8].rotation.y -= 0.01;
+        sphere[8].rotation.y -= 0.05;
         sphere[8].rotateAround(new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,1,0), 0.0135 * c);
-    }); 
-
+    });
     
+
   
+    //loops to exclude planets from light that is affecting sun, turns collisions on
     for (var i = 1; i < sphere.length; i++) {
       sunLight.excludedMeshes.push(sphere[i]); 
     }
-
     for (let i = 0; i < sphere.length; i++) {
       sphere[i].checkCollisions = true; 
     }
     
-    /*
+
+
+    //walls to bound player from walking off map
     const walls: BABYLON.Mesh[] = [];
     walls[0] = BABYLON.MeshBuilder.CreateBox(
       "wall1",
@@ -350,15 +375,15 @@ export class SolarSystemScene {
 
     for (var i = 0; i < walls.length; i++) {
       sunLight.excludedMeshes.push(walls[i]); 
-      walls[i].checkCollisions = true;
-      walls[i].material = this.CreateTriangle(); 
+      light.excludedMeshes.push(walls[i]);
+      walls[i].checkCollisions = true; 
     }
-    */
     return scene;
   }
 
   
   
+  //PBR texture method for Sun
   CreateSun(): PBRMaterial {
     const pbr = new PBRMaterial("pbr", this.scene); 
 
@@ -377,6 +402,9 @@ export class SolarSystemScene {
     return pbr; 
   }
 
+  
+  
+  //glacial texture used for neptune
   CreateGlacial(): PBRMaterial {
     const pbr = new PBRMaterial("pbr", this.scene); 
 
@@ -396,9 +424,12 @@ export class SolarSystemScene {
     return pbr; 
   }
 
+  
+  
+  //texture method for the spawn-in platform
   CreateTriangle(): PBRMaterial {
     const pbr = new PBRMaterial("pbr", this.scene); 
-    const uvScale = 20;
+    const uvScale = 50;
     const texArr: Texture[] = [];
 
     const albedoTex = new Texture("./textures/triangle/triangle_albedo.png", this.scene);
@@ -425,6 +456,8 @@ export class SolarSystemScene {
 }
 
 
+  
+//moon texture used for objects orbiting Saturn
   CreateAsteroid(): PBRMaterial {
     const pbr = new PBRMaterial("pbr", this.scene); 
     const uvScale = 1;
